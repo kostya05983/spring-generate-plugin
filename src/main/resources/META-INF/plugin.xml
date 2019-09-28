@@ -1,0 +1,24 @@
+<idea-plugin>
+    <id>NoSqlPlugin</id>
+    <name>NoSqlPlugin</name>
+    <vendor email="kostya05983@mail.ru" url="http://www.yourcompany.com">YourCompany</vendor>
+
+    <description><![CDATA[
+    Enter short description for your plugin here.<br>
+    <em>most HTML tags may be used</em>
+    ]]></description>
+
+    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
+         on how to target different products -->
+    <!-- uncomment to enable plugin in all products
+    <depends>com.intellij.modules.lang</depends>
+    -->
+    <actions>
+        <group id="spring-generate-plugin" text="Spring Generate" popup="true">
+            <add-to-group group-id="EditorPopupMenu" anchor="first"/>
+        </group>
+        <action class="ru.kontur.spring.idea.plugin.actions.GenerateDAOAction" id="GenerateDao">
+            <add-to-group group-id="spring-generate-plugin" anchor="after"/>
+        </action>
+    </actions>
+</idea-plugin>
