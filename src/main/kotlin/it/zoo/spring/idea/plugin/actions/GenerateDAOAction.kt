@@ -1,4 +1,4 @@
-package ru.kontur.spring.idea.plugin.actions
+package it.zoo.spring.idea.plugin.actions
 
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
@@ -7,15 +7,22 @@ import com.intellij.openapi.actionSystem.PlatformDataKeys
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiFile
 import com.intellij.psi.util.PsiTreeUtil
+import it.zoo.spring.idea.plugin.service.GenerateDAOService
 
+/**
+ * @author Konstantin Volivach
+ */
 class GenerateDAOAction : AnAction() {
 
     private companion object {
         const val KOTLIN_EXTENSION = "kotlin"
     }
 
+    private val service = GenerateDAOService()
+
     override fun actionPerformed(e: AnActionEvent) {
-        val psiClass = extractPsiClass(e)
+        val psiClass = requireNotNull(extractPsiClass(e)) { "Psi class can't be null" }
+        service.generate(psiClass)
     }
 
     private fun extractPsiClass(anActionEvent: AnActionEvent): PsiClass? {
