@@ -17,8 +17,8 @@
         <group id="spring-generate-plugin" text="Spring Generate" popup="true">
             <add-to-group group-id="EditorPopupMenu" anchor="first"/>
         </group>
-        <action class="it.zoo.spring.idea.plugin.actions.GenerateDAOAction" id="GenerateDao">
-            <add-to-group group-id="spring-generate-plugin" anchor="after"/>
+        <action class="it.zoo.spring.idea.plugin.actions.GenerateDAOAction" text="Generate Dao" id="GenerateDao">
+            <add-to-group group-id="spring-generate-plugin" anchor="after" relative-to-action="GenerateDao"/>
         </action>
     </actions>
 </idea-plugin>

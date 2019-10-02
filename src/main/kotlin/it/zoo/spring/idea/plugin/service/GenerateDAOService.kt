@@ -6,7 +6,7 @@ import com.intellij.psi.util.PsiUtil
 class GenerateDAOService {
 
     fun generate(psiClass: PsiClass) {
-
+        println("Deepness ${countDeep(psiClass)}")
     }
 
     fun countDeep(psiClass: PsiClass): Int {
