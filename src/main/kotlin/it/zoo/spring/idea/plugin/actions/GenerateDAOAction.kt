@@ -4,7 +4,8 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.LangDataKeys
 import com.intellij.openapi.actionSystem.PlatformDataKeys
-import com.intellij.psi.PsiClass
+import org.jetbrains.kotlin.psi.KtClass
+import org.jetbrains.kotlin.psi.KtValueArgument
 import com.intellij.psi.PsiFile
 import com.intellij.psi.util.PsiTreeUtil
 import it.zoo.spring.idea.plugin.service.GenerateDAOService
@@ -25,11 +26,12 @@ class GenerateDAOAction : AnAction() {
         service.generate(psiClass)
     }
 
-    private fun extractPsiClass(anActionEvent: AnActionEvent): PsiClass? {
+    private fun extractPsiClass(anActionEvent: AnActionEvent): KtClass? {
         val psiFile = requireNotNull(anActionEvent.getData(LangDataKeys.PSI_FILE)) { "psiFile must not be null" }
         val editor = requireNotNull(anActionEvent.getData(PlatformDataKeys.EDITOR)) { "editor must not be null" }
         val elementAt = psiFile.findElementAt(editor.caretModel.offset)
-        return PsiTreeUtil.getParentOfType(elementAt, PsiClass::class.java)
+        PsiTreeUtil.findChildOfType(psiFile, KtClass::class.java)
+        return PsiTreeUtil.getParentOfType(elementAt, KtClass::class.java)
     }
 
     private fun isKotlinFile(psiFile: PsiFile): Boolean {

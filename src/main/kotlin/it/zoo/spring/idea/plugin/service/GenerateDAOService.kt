@@ -1,22 +1,22 @@
 package it.zoo.spring.idea.plugin.service
 
-import com.intellij.psi.PsiClass
-import com.intellij.psi.util.PsiUtil
+import com.intellij.psi.PsiElement
+import org.jetbrains.kotlin.psi.KtClass
+import org.jetbrains.kotlin.psi.psiUtil.allChildren
 
 class GenerateDAOService {
 
-    fun generate(psiClass: PsiClass) {
+    fun generate(psiClass: KtClass) {
         println("Deepness ${countDeep(psiClass)}")
     }
 
-    fun countDeep(psiClass: PsiClass): Int {
-        val fields = psiClass.allFields
+    fun countDeep(psiClass: PsiElement): Int {
+        val childs = psiClass.allChildren
 
         var count = 0
-        for (field in fields) {
-            val containingClass = field.containingClass
-            if (containingClass != null && PsiUtil.isFromDefaultPackage(field)) {
-                count += countDeep(containingClass)
+        for (child in childs) {
+            if (child.children.isNotEmpty()) {
+                count += countDeep(child)
             }
         }
         return count
