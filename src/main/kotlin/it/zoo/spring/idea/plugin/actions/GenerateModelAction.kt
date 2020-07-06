@@ -5,25 +5,25 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.LangDataKeys
 import com.intellij.openapi.actionSystem.PlatformDataKeys
 import org.jetbrains.kotlin.psi.KtClass
-import org.jetbrains.kotlin.psi.KtValueArgument
 import com.intellij.psi.PsiFile
 import com.intellij.psi.util.PsiTreeUtil
-import it.zoo.spring.idea.plugin.service.GenerateDAOService
+import it.zoo.spring.idea.plugin.service.GenerateModelService
 
 /**
  * @author Konstantin Volivach
  */
-class GenerateDAOAction : AnAction() {
+class GenerateModelAction : AnAction() {
 
     private companion object {
         const val KOTLIN_EXTENSION = "kotlin"
     }
 
-    private val service = GenerateDAOService()
+    private val service = GenerateModelService()
 
     override fun actionPerformed(e: AnActionEvent) {
         val psiClass = requireNotNull(extractPsiClass(e)) { "Psi class can't be null" }
-        service.generate(psiClass)
+
+//        service.generate(psiClass)
     }
 
     private fun extractPsiClass(anActionEvent: AnActionEvent): KtClass? {

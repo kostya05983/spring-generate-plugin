@@ -4,7 +4,7 @@ import com.intellij.psi.PsiElement
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.psiUtil.allChildren
 
-class GenerateDAOService {
+class GenerateModelService {
 
     fun generate(psiClass: KtClass) {
         println("Deepness ${countDeep(psiClass)}")
