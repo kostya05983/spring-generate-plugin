@@ -7,7 +7,10 @@ import com.intellij.openapi.actionSystem.PlatformDataKeys
 import org.jetbrains.kotlin.psi.KtClass
 import com.intellij.psi.PsiFile
 import com.intellij.psi.util.PsiTreeUtil
+import it.zoo.spring.idea.plugin.dialogs.GenerateModelDialog
 import it.zoo.spring.idea.plugin.service.GenerateModelService
+import org.jetbrains.kotlin.psi.psiUtil.containingClassOrObject
+import org.jetbrains.kotlin.psi.*
 
 /**
  * @author Konstantin Volivach
@@ -21,17 +24,15 @@ class GenerateModelAction : AnAction() {
     private val service = GenerateModelService()
 
     override fun actionPerformed(e: AnActionEvent) {
-        val psiClass = requireNotNull(extractPsiClass(e)) { "Psi class can't be null" }
+        val ktClass = requireNotNull(extractPsiClass(e)) { "Psi class can't be null" }
+        val generateModelDialog = GenerateModelDialog(ktClass)
 
-//        service.generate(psiClass)
+        generateModelDialog.showDialog()
     }
 
     private fun extractPsiClass(anActionEvent: AnActionEvent): KtClass? {
         val psiFile = requireNotNull(anActionEvent.getData(LangDataKeys.PSI_FILE)) { "psiFile must not be null" }
-        val editor = requireNotNull(anActionEvent.getData(PlatformDataKeys.EDITOR)) { "editor must not be null" }
-        val elementAt = psiFile.findElementAt(editor.caretModel.offset)
-        PsiTreeUtil.findChildOfType(psiFile, KtClass::class.java)
-        return PsiTreeUtil.getParentOfType(elementAt, KtClass::class.java)
+        return PsiTreeUtil.findChildOfType(psiFile, KtClass::class.java)
     }
 
     private fun isKotlinFile(psiFile: PsiFile): Boolean {
