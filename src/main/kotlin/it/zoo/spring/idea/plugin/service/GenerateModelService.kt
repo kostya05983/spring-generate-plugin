@@ -1,24 +1,23 @@
 package it.zoo.spring.idea.plugin.service
 
-import com.intellij.psi.PsiElement
+import it.zoo.spring.idea.plugin.storage.ProjectStorage
 import org.jetbrains.kotlin.psi.KtClass
-import org.jetbrains.kotlin.psi.psiUtil.allChildren
 
 class GenerateModelService {
 
-    fun generate(psiClass: KtClass) {
-        println("Deepness ${countDeep(psiClass)}")
-    }
+    data class GeneratedFile(
+        val name: String,
+        val text: String
+    )
 
-    fun countDeep(psiClass: PsiElement): Int {
-        val childs = psiClass.allChildren
+    fun generate() {
+        val model = ProjectStorage.model!! // TODO
+        val modelDto = ProjectStorage.modelDto!! // TODO
 
-        var count = 0
-        for (child in childs) {
-            if (child.children.isNotEmpty()) {
-                count += countDeep(child)
-            }
+        if (model.isData()) {
+            val primaryConstructor = model.primaryConstructor!! // TODO data class without primary constructor
+            primaryConstructor.valueParameters
+
         }
-        return count
     }
 }
