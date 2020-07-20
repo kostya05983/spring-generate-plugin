@@ -19,9 +19,11 @@
         <group id="spring-generate-plugin" text="Spring Generate" popup="true">
             <add-to-group group-id="EditorPopupMenu" anchor="first"/>
         </group>
-        <action class="it.zoo.spring.idea.plugin.actions.AddModelAction" text="Добавить Модель" id="GenerateDao">
-            <add-to-group group-id="spring-generate-plugin" anchor="after" relative-to-action="GenerateDao"/>
+        <action class="it.zoo.spring.idea.plugin.actions.AddModelAction" text="Добавить Модель" id="AddModel">
+            <add-to-group group-id="spring-generate-plugin" anchor="after" relative-to-action="AddModel"/>
         </action>
-
+        <action class="it.zoo.spring.idea.plugin.actions.AddDtoAction" text="Добавить DTO" id="AddDTO">
+            <add-to-group group-id="spring-generate-plugin" anchor="after" relative-to-action="AddDTO"/>
+        </action>
     </actions>
 </idea-plugin>
