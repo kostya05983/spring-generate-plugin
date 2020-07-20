@@ -1,0 +1,11 @@
+package it.zoo.spring.idea.plugin.actions
+
+import com.intellij.openapi.actionSystem.AnAction
+import com.intellij.openapi.actionSystem.AnActionEvent
+
+class AddDtoAction : AnAction() {
+    override fun actionPerformed(e: AnActionEvent) {
+        TODO("Not yet implemented")
+    }
+
+}
