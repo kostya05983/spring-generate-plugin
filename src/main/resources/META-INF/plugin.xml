@@ -16,14 +16,22 @@
     <depends>com.intellij.modules.lang</depends>
     -->
     <actions>
-        <group id="spring-generate-plugin" text="Spring Generate" popup="true">
+        <group id="spring-choose-actions" text="Spring Generate" popup="true">
             <add-to-group group-id="EditorPopupMenu" anchor="first"/>
         </group>
         <action class="it.zoo.spring.idea.plugin.actions.AddModelAction" text="Добавить Модель" id="AddModel">
-            <add-to-group group-id="spring-generate-plugin" anchor="after" relative-to-action="AddModel"/>
+            <add-to-group group-id="spring-choose-actions" anchor="after" relative-to-action="AddModel"/>
         </action>
         <action class="it.zoo.spring.idea.plugin.actions.AddDtoAction" text="Добавить DTO" id="AddDTO">
-            <add-to-group group-id="spring-generate-plugin" anchor="after" relative-to-action="AddDTO"/>
+            <add-to-group group-id="spring-choose-actions" anchor="after" relative-to-action="AddDTO"/>
+        </action>
+
+        <group id="spring-generations-actions" text="Spring Generate" popup="true">
+            <add-to-group group-id="ProjectViewPopupMenu" anchor="first"/>
+        </group>
+        <action class="it.zoo.spring.idea.plugin.actions.GenerateConverterAction" text="Сгенерировать Конвертер"
+                id="GenerateConverter">
+            <add-to-group group-id="spring-generations-actions" anchor="after" relative-to-action="GenerateConverter"/>
         </action>
     </actions>
 </idea-plugin>
