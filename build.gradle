@@ -21,7 +21,7 @@ compileTestKotlin {
 }
 intellij {
     version '2019.3'
-    plugins 'Kotlin'
+    plugins 'Kotlin', 'java'
 }
 patchPluginXml {
     changeNotes """
