@@ -8,6 +8,9 @@ class CodeGenerator {
     fun formString(converter: Converter): String {
         val sb = StringBuilder()
         sb.append("import org.springframework.core.convert.converter.Converter\n")
+        converter.imports.forEach {
+            sb.append("import $it\n")
+        }
         sb.append("object ${converter.name}: Converter<${converter.from}, ${converter.to}>{\n")
         sb.append("override fun convert(source: ${converter.from}): ${converter.to} {\n")
         sb.append("return ${converter.to}(\n")

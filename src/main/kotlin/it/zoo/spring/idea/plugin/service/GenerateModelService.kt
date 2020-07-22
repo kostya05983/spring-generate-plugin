@@ -11,7 +11,6 @@ import it.zoo.spring.idea.plugin.model.Converter
 import it.zoo.spring.idea.plugin.storage.ProjectStorage
 import org.jetbrains.kotlin.idea.refactoring.fqName.fqName
 import org.jetbrains.kotlin.idea.stubindex.KotlinClassShortNameIndex
-import org.jetbrains.kotlin.js.descriptorUtils.nameIfStandardType
 import org.jetbrains.kotlin.nj2k.postProcessing.type
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtPsiFactory
@@ -35,6 +34,7 @@ class GenerateModelService(
         val directory = PsiDirectoryFactory.getInstance(project).createDirectory(virtualFile)
         files.forEach {
             CodeStyleManager.getInstance(project).reformat(it)
+
         }
         application.runWriteAction {
             files.forEach {
@@ -65,6 +65,10 @@ class GenerateModelService(
                         name = "${pair.dto.name}Converter",
                         from = pair.model.name!!,
                         to = pair.dto.name!!,
+                        imports = listOfNotNull(
+                            pair.dto.fqName?.asString(),
+                            pair.model.fqName?.asString()
+                        ),
                         elements = convertedElements
                     )
                     result.add(converter)
