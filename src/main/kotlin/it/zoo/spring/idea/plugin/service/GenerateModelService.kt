@@ -5,117 +5,144 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.codeStyle.CodeStyleManager
 import com.intellij.psi.impl.file.PsiDirectoryFactory
+import com.intellij.psi.search.GlobalSearchScope
+import it.zoo.spring.idea.plugin.model.ConvertedElement
+import it.zoo.spring.idea.plugin.model.Converter
 import it.zoo.spring.idea.plugin.storage.ProjectStorage
+import org.jetbrains.kotlin.idea.refactoring.fqName.fqName
+import org.jetbrains.kotlin.idea.stubindex.KotlinClassShortNameIndex
+import org.jetbrains.kotlin.js.descriptorUtils.nameIfStandardType
+import org.jetbrains.kotlin.nj2k.postProcessing.type
+import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtPsiFactory
-import java.lang.StringBuilder
+import java.util.*
 
 class GenerateModelService(
     private val virtualFile: VirtualFile,
     private val project: Project
 ) {
-    data class ConvertedElement(
-        val from: String,
-        val to: String,
-        val toType: String? = null,
-        val type: Type
-    ) {
-        enum class Type {
-            SIMPLE,
-            NULLABLE_CONVERT,
-            CONVERT
-        }
-    }
-
-    data class Converter(
-        val name: String,
-        val from: String,
-        val to: String,
-        val elements: List<ConvertedElement>
-    )
+    private val codeGenerator = CodeGenerator()
 
     fun generate() {
-        val converter = analytic()
-        val str = formString(converter)
-        val ktFile = KtPsiFactory(project).createFile("${converter.name}.kt", str)
+        val converters = analytic()
+        val files = converters.map {
+            val str = codeGenerator.formString(it)
+            KtPsiFactory(project).createFile("${it.name}.kt", str)
+        }
 
         val application = ApplicationManager.getApplication()
 
-
         val directory = PsiDirectoryFactory.getInstance(project).createDirectory(virtualFile)
-
-        CodeStyleManager.getInstance(project).reformat(ktFile)
+        files.forEach {
+            CodeStyleManager.getInstance(project).reformat(it)
+        }
         application.runWriteAction {
-            directory.add(ktFile)
+            files.forEach {
+                directory.add(it)
+            }
         }
     }
 
-    private fun analytic(): Converter {
+    private fun analytic(): List<Converter> {
         val model = ProjectStorage.model!! // TODO
         val modelDto = ProjectStorage.modelDto!! // TODO
+        val stack = Stack<DtoModelPair>()
+        stack.push(
+            DtoModelPair(modelDto, model)
+        )
+        val result = mutableListOf<Converter>()
+        while (stack.isNotEmpty()) {
+            val pair = stack.pop()
+            when {
+                modelDto.isData() -> {
+                    val pairs = analyticDataClass(pair)
+                    val tasks = pairs.mapNotNull { it.first }
+                    tasks.forEach { stack.push(it) }
 
-        if (modelDto.isData()) {
-            val primaryConstructor = modelDto.primaryConstructor!! // TODO data class without primary constructor
-            val convertedElements = primaryConstructor.valueParameters.map { valueParameter ->
-                val modelValueParameter = model.primaryConstructor!!.valueParameterList!!.parameters.firstOrNull {
-                    it.name == valueParameter.name
+                    val convertedElements = pairs.map { it.second }
+
+                    val converter = Converter(
+                        name = "${pair.dto.name}Converter",
+                        from = pair.model.name!!,
+                        to = pair.dto.name!!,
+                        elements = convertedElements
+                    )
+                    result.add(converter)
                 }
-                when {
-                    modelValueParameter == null -> {
-                        ConvertedElement(valueParameter.name!!, "TODO()", null, ConvertedElement.Type.SIMPLE)
-                    }
-                    modelValueParameter.valOrVarKeyword?.text == valueParameter.valOrVarKeyword?.text -> {
-                        ConvertedElement(
+                modelDto.isEnum() -> {
+                    TODO()
+                }
+                modelDto.isSealed() -> {
+                    TODO()
+                }
+                else -> TODO()
+            }
+        }
+        return result
+    }
+
+    data class DtoModelPair(
+        val dto: KtClass,
+        val model: KtClass
+    )
+
+    private fun analyticDataClass(modelDtoPair: DtoModelPair): List<Pair<DtoModelPair?, ConvertedElement>> {
+        val parameters = modelDtoPair.dto.primaryConstructorParameters
+        return parameters.map { valueParameter ->
+            val modelValueParameter =
+                modelDtoPair.model.primaryConstructorParameters.firstOrNull { it.name == valueParameter.name }
+            when {
+                modelValueParameter == null -> {
+                    Pair(null, ConvertedElement(valueParameter.name!!, "TODO()", null, ConvertedElement.Type.SIMPLE))
+                }
+                modelValueParameter.type() == valueParameter.type() -> {
+                    Pair(
+                        null, ConvertedElement(
                             valueParameter.name!!,
                             modelValueParameter.name!!,
                             null,
                             ConvertedElement.Type.SIMPLE
                         )
-                    }
-                    modelValueParameter.valOrVarKeyword?.text != valueParameter.valOrVarKeyword?.text -> {
-                        //TODO check is optional
-                        ConvertedElement(
-                            valueParameter.name!!,
-                            modelValueParameter.name!!,
-                            "SomeType",
-                            ConvertedElement.Type.CONVERT
+                    )
+                }
+                modelValueParameter.type() != valueParameter.type() -> {
+                    val dtoShortName = valueParameter.type()?.fqName?.shortName()?.identifier!!
+                    val modelShortName = modelValueParameter.type()?.fqName?.shortName()?.identifier!!
+                    val dtoKClass = KotlinClassShortNameIndex.getInstance()
+                        .get(dtoShortName, project, GlobalSearchScope.allScope(project)).first() as KtClass
+                    val modelKClass = KotlinClassShortNameIndex.getInstance()
+                        .get(modelShortName, project, GlobalSearchScope.allScope(project)).first() as KtClass
+                    val task = DtoModelPair(dtoKClass, modelKClass)
+
+                    if (valueParameter.type()!!.isMarkedNullable) {
+                        Pair(
+                            task, ConvertedElement(
+                                valueParameter.name!!,
+                                modelValueParameter.name!!,
+                                dtoShortName,
+                                ConvertedElement.Type.NULLABLE_CONVERT
+                            )
+                        )
+                    } else {
+                        Pair(
+                            task, ConvertedElement(
+                                valueParameter.name!!,
+                                modelValueParameter.name!!,
+                                dtoShortName,
+                                ConvertedElement.Type.CONVERT
+                            )
                         )
                     }
-                    else -> ConvertedElement(valueParameter.name!!, "TODO()", null, ConvertedElement.Type.SIMPLE)
                 }
-            }
-            return Converter(
-                name = "${modelDto.name}Converter",
-                from = model.name!!,
-                to = modelDto.name!!,
-                elements = convertedElements
-            )
-        } else {
-            TODO()
-        }
-    }
-
-    fun formString(converter: Converter): String {
-        val sb = StringBuilder()
-        sb.append("import org.springframework.core.convert.converter.Converter\n")
-        sb.append("object ${converter.name}: Converter<${converter.from}, ${converter.to}>{\n")
-        sb.append("override fun convert(source: ${converter.from}): ${converter.to} {\n")
-        sb.append("return ${converter.to}(\n")
-
-        for (it in converter.elements) {
-            when (it.type) {
-                ConvertedElement.Type.SIMPLE -> sb.append("${it.from} = ${it.to}")
-                ConvertedElement.Type.NULLABLE_CONVERT -> sb.append("${it.from}=${it.to}?.let{${it.to}Converter.convert(it)}")
-                ConvertedElement.Type.CONVERT -> sb.append("${it.from}=${it.to}Converter.convert")
-            }
-            if (it == converter.elements.last()) {
-                sb.append("\n")
-            } else {
-                sb.append(",\n")
+                else -> Pair(
+                    null, ConvertedElement(
+                        valueParameter.name!!,
+                        "TODO()",
+                        null,
+                        ConvertedElement.Type.SIMPLE
+                    )
+                )
             }
         }
-        sb.append(")\n")
-        sb.append("}\n")
-        sb.append("}\n")
-        return sb.toString()
     }
 }
