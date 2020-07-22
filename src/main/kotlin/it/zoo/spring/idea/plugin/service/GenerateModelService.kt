@@ -74,7 +74,39 @@ class GenerateModelService(
                     result.add(converter)
                 }
                 modelDto.isEnum() -> {
-                    TODO()
+                    val modelShortName = model.fqName!!.shortName().identifier
+                    val dtoShortName = modelDto.fqName!!.shortName().identifier
+                    val convertedElements = model.declarations.map { declaration ->
+                        val dtoDeclaration = modelDto.declarations.firstOrNull { it.name == declaration.name }
+                        when {
+                            dtoDeclaration == null -> {
+                                ConvertedElement(
+                                    from = "$modelShortName.${declaration.name}",
+                                    to = "TODO()",
+                                    type = ConvertedElement.Type.SIMPLE
+                                )
+                            }
+                            else -> {
+                                ConvertedElement(
+                                    from = "$modelShortName.${declaration.name}",
+                                    to = "$dtoShortName.${dtoDeclaration.name}",
+                                    type = ConvertedElement.Type.SIMPLE
+                                )
+                            }
+                        }
+                    }
+                    val converter = Converter(
+                        name = "${pair.dto.name}Converter",
+                        from = pair.model.name!!,
+                        to = pair.dto.name!!,
+                        imports = listOfNotNull(
+                            pair.dto.fqName?.asString(),
+                            pair.model.fqName?.asString()
+                        ),
+                        elements = convertedElements,
+                        typeClass = Converter.TypeClass.ENUM
+                    )
+                    result.add(converter)
                 }
                 modelDto.isSealed() -> {
                     TODO()

@@ -5,5 +5,11 @@ data class Converter(
     val from: String,
     val to: String,
     val imports: List<String>,
-    val elements: List<ConvertedElement>
-)
+    val elements: List<ConvertedElement>,
+    val typeClass: TypeClass = TypeClass.DATA
+) {
+    enum class TypeClass {
+        DATA,
+        ENUM
+    }
+}
