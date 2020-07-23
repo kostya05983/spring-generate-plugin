@@ -9,6 +9,8 @@ data class ConvertedElement(
     enum class Type {
         SIMPLE,
         NULLABLE_CONVERT,
-        CONVERT
+        CONVERT,
+        LIST_CONVERT,
+        NULLABLE_LIST_CONVERT
     }
 }

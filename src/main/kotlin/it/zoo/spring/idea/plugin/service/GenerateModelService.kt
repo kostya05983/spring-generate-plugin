@@ -6,6 +6,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.codeStyle.CodeStyleManager
 import com.intellij.psi.impl.file.PsiDirectoryFactory
 import com.intellij.psi.search.GlobalSearchScope
+import com.intellij.psi.stubs.StubIndex
 import it.zoo.spring.idea.plugin.model.ConvertedElement
 import it.zoo.spring.idea.plugin.model.Converter
 import it.zoo.spring.idea.plugin.storage.ProjectStorage
@@ -14,6 +15,7 @@ import org.jetbrains.kotlin.idea.stubindex.KotlinClassShortNameIndex
 import org.jetbrains.kotlin.nj2k.postProcessing.type
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtPsiFactory
+import org.jetbrains.kotlin.types.KotlinType
 import java.util.*
 
 class GenerateModelService(
@@ -144,29 +146,25 @@ class GenerateModelService(
                 modelValueParameter.type() != valueParameter.type() -> {
                     val dtoShortName = valueParameter.type()?.fqName?.shortName()?.identifier!!
                     val modelShortName = modelValueParameter.type()?.fqName?.shortName()?.identifier!!
-                    val dtoKClass = KotlinClassShortNameIndex.getInstance()
-                        .get(dtoShortName, project, GlobalSearchScope.allScope(project)).first() as KtClass
-                    val modelKClass = KotlinClassShortNameIndex.getInstance()
-                        .get(modelShortName, project, GlobalSearchScope.allScope(project)).first() as KtClass
-                    val task = DtoModelPair(dtoKClass, modelKClass)
-
-                    if (valueParameter.type()!!.isMarkedNullable) {
-                        Pair(
-                            task, ConvertedElement(
-                                valueParameter.name!!,
-                                modelValueParameter.name!!,
-                                dtoShortName,
-                                ConvertedElement.Type.NULLABLE_CONVERT
-                            )
+                    val dtoModelType = valueParameter.type()!!
+                    val modelType = modelValueParameter.type()!!
+                    if (dtoShortName == "List" && modelShortName == "List") {
+                        convertUnmatch(
+                            valueParameter.name!!,
+                            modelValueParameter.name!!,
+                            dtoModelType.arguments[0].type,
+                            modelType.arguments[0].type,
+                            ConvertedElement.Type.LIST_CONVERT,
+                            ConvertedElement.Type.NULLABLE_LIST_CONVERT
                         )
                     } else {
-                        Pair(
-                            task, ConvertedElement(
-                                valueParameter.name!!,
-                                modelValueParameter.name!!,
-                                dtoShortName,
-                                ConvertedElement.Type.CONVERT
-                            )
+                        convertUnmatch(
+                            valueParameter.name!!,
+                            modelValueParameter.name!!,
+                            dtoModelType,
+                            modelType,
+                            ConvertedElement.Type.CONVERT,
+                            ConvertedElement.Type.NULLABLE_CONVERT
                         )
                     }
                 }
@@ -179,6 +177,44 @@ class GenerateModelService(
                     )
                 )
             }
+        }
+    }
+
+    private fun convertUnmatch(
+        dtoParameterName: String,
+        modelParameterName: String,
+        dtoParamter: KotlinType,
+        modelParameter: KotlinType,
+        nullableType: ConvertedElement.Type,
+        type: ConvertedElement.Type
+    ): Pair<DtoModelPair?, ConvertedElement> {
+        val dtoShortName = dtoParamter.fqName?.shortName()?.identifier!!
+        val modelShortName = modelParameter.fqName?.shortName()?.identifier!!
+
+        val dtoKClass = KotlinClassShortNameIndex.getInstance()
+            .get(dtoShortName, project, GlobalSearchScope.allScope(project)).first() as KtClass
+        val modelKClass = KotlinClassShortNameIndex.getInstance()
+            .get(modelShortName, project, GlobalSearchScope.allScope(project)).first() as KtClass
+        val task = DtoModelPair(dtoKClass, modelKClass)
+
+        return if (dtoParamter.isMarkedNullable) {
+            Pair(
+                task, ConvertedElement(
+                    dtoParameterName,
+                    modelParameterName,
+                    dtoShortName,
+                    nullableType
+                )
+            )
+        } else {
+            Pair(
+                task, ConvertedElement(
+                    dtoParameterName,
+                    modelParameterName,
+                    dtoShortName,
+                    type
+                )
+            )
         }
     }
 }
