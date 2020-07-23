@@ -1,6 +1,6 @@
 <idea-plugin>
-    <id>NoSqlPlugin</id>
-    <name>NoSqlPlugin</name>
+    <id>spring-generation-tools</id>
+    <name>spring-generation-tools</name>
     <vendor email="kostya05983@mail.ru" url="http://www.yourcompany.com">YourCompany</vendor>
 
     <description><![CDATA[

@@ -79,9 +79,8 @@ class GenerateModelService(
                     val modelShortName = model.fqName!!.shortName().identifier
                     val dtoShortName = modelDto.fqName!!.shortName().identifier
                     val convertedElements = model.declarations.map { declaration ->
-                        val dtoDeclaration = modelDto.declarations.firstOrNull { it.name == declaration.name }
-                        when {
-                            dtoDeclaration == null -> {
+                        when (val dtoDeclaration = modelDto.declarations.firstOrNull { it.name == declaration.name }) {
+                            null -> {
                                 ConvertedElement(
                                     from = "$modelShortName.${declaration.name}",
                                     to = "TODO()",
@@ -192,10 +191,10 @@ class GenerateModelService(
         val modelShortName = modelParameter.fqName?.shortName()?.identifier!!
 
         val dtoKClass = KotlinClassShortNameIndex.getInstance()
-            .get(dtoShortName, project, GlobalSearchScope.allScope(project)).first() as KtClass
+            .get(dtoShortName, project, GlobalSearchScope.allScope(project)).firstOrNull() as? KtClass
         val modelKClass = KotlinClassShortNameIndex.getInstance()
-            .get(modelShortName, project, GlobalSearchScope.allScope(project)).first() as KtClass
-        val task = DtoModelPair(dtoKClass, modelKClass)
+            .get(modelShortName, project, GlobalSearchScope.allScope(project)).firstOrNull() as? KtClass
+        val task = if (dtoKClass != null && modelKClass != null) DtoModelPair(dtoKClass, modelKClass) else null
 
         return if (dtoParamter.isMarkedNullable) {
             Pair(
