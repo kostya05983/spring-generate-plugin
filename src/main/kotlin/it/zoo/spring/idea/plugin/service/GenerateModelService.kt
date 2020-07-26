@@ -5,11 +5,12 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.codeStyle.CodeStyleManager
 import com.intellij.psi.impl.file.PsiDirectoryFactory
+import com.intellij.psi.impl.java.stubs.index.JavaShortClassNameIndex
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.stubs.StubIndex
-import it.zoo.spring.idea.plugin.model.ConvertedElement
-import it.zoo.spring.idea.plugin.model.Converter
+import it.zoo.spring.idea.plugin.model.*
 import it.zoo.spring.idea.plugin.storage.ProjectStorage
+import it.zoo.spring.idea.plugin.utils.SealedClassUtils
 import org.jetbrains.kotlin.idea.refactoring.fqName.fqName
 import org.jetbrains.kotlin.idea.stubindex.KotlinClassShortNameIndex
 import org.jetbrains.kotlin.nj2k.postProcessing.type
@@ -63,7 +64,7 @@ class GenerateModelService(
 
                     val convertedElements = pairs.map { it.second }
 
-                    val converter = Converter(
+                    val converter = DataClassConverter(
                         name = "${pair.dto.name}Converter",
                         from = pair.model.name!!,
                         to = pair.dto.name!!,
@@ -96,7 +97,7 @@ class GenerateModelService(
                             }
                         }
                     }
-                    val converter = Converter(
+                    val converter = EnumClassConverter(
                         name = "${pair.dto.name}Converter",
                         from = pair.model.name!!,
                         to = pair.dto.name!!,
@@ -104,18 +105,45 @@ class GenerateModelService(
                             pair.dto.fqName?.asString(),
                             pair.model.fqName?.asString()
                         ),
-                        elements = convertedElements,
-                        typeClass = Converter.TypeClass.ENUM
+                        elements = convertedElements
                     )
                     result.add(converter)
                 }
                 modelDto.isSealed() -> {
-                    TODO()
+                    val modelChildren = SealedClassUtils.findInheritorsOfSealedClass(modelDto, project)
+                    val dtoChildren = SealedClassUtils.findInheritorsOfSealedClass(modelDto, project)
+                    val convertedElements = modelChildren.map { modelClass ->
+                        val dtoClass = dtoChildren.find { stupidMaxMatch(modelClass.name!!, it.name!!) }
+                        ConvertedElement(
+                            from = modelClass.name!!,
+                            to = dtoClass?.name ?: "TODO()",
+                            type = ConvertedElement.Type.SIMPLE
+                        )
+                    }
+
+                    val converter = SealedClassConverter(
+                        name = "${pair.dto.name}Converter",
+                        from = pair.model.name!!,
+                        to = pair.dto.name!!,
+                        imports = listOfNotNull(
+                            pair.dto.fqName?.asString(),
+                            pair.model.fqName?.asString()
+                        ),
+                        elements = convertedElements
+                    )
                 }
                 else -> TODO()
             }
         }
         return result
+    }
+
+    private fun stupidMaxMatch(name: String, other: String): Boolean {
+        return if (name.length < other.length) {
+            other.contains(name)
+        } else {
+            name.contains(other)
+        }
     }
 
     data class DtoModelPair(

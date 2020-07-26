@@ -1,15 +1,32 @@
 package it.zoo.spring.idea.plugin.model
 
-data class Converter(
-    val name: String,
-    val from: String,
-    val to: String,
-    val imports: List<String>,
-    val elements: List<ConvertedElement>,
-    val typeClass: TypeClass = TypeClass.DATA
-) {
-    enum class TypeClass {
-        DATA,
-        ENUM
-    }
+sealed class Converter {
+    abstract val name: String
+    abstract val from: String
+    abstract val to: String
+    abstract val imports: List<String>
 }
+
+data class DataClassConverter(
+    override val name: String,
+    override val from: String,
+    override val to: String,
+    override val imports: List<String>,
+    val elements: List<ConvertedElement>
+) : Converter()
+
+data class EnumClassConverter(
+    override val name: String,
+    override val from: String,
+    override val to: String,
+    override val imports: List<String>,
+    val elements: List<ConvertedElement>
+) : Converter()
+
+data class SealedClassConverter(
+    override val name: String,
+    override val from: String,
+    override val to: String,
+    override val imports: List<String>,
+    val elements: List<ConvertedElement>
+) : Converter()

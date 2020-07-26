@@ -1,7 +1,6 @@
 package it.zoo.spring.idea.plugin.service
 
-import it.zoo.spring.idea.plugin.model.ConvertedElement
-import it.zoo.spring.idea.plugin.model.Converter
+import it.zoo.spring.idea.plugin.model.*
 import java.lang.StringBuilder
 
 class CodeGenerator {
@@ -13,8 +12,8 @@ class CodeGenerator {
         }
         sb.append("object ${converter.name}: Converter<${converter.from}, ${converter.to}>{\n")
         sb.append("override fun convert(source: ${converter.from}): ${converter.to} {\n")
-        when (converter.typeClass) {
-            Converter.TypeClass.DATA -> {
+        when (converter) {
+            is DataClassConverter -> {
                 sb.append("return ${converter.to}(\n")
 
                 for (it in converter.elements) {
@@ -33,12 +32,13 @@ class CodeGenerator {
                 }
                 sb.append(")\n")
             }
-            Converter.TypeClass.ENUM -> {
+            is EnumClassConverter -> {
                 sb.append("return when(source) {")
                 for (it in converter.elements)
                     sb.append("${it.from} -> ${it.to}\n")
                 sb.append("}\n")
             }
+            is SealedClassConverter -> TODO()
         }
         sb.append("}\n")
         sb.append("}\n")
