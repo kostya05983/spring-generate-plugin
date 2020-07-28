@@ -3,14 +3,14 @@ package it.zoo.spring.idea.plugin.service
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.psi.PsiManager
 import com.intellij.psi.codeStyle.CodeStyleManager
 import com.intellij.psi.impl.file.PsiDirectoryFactory
-import com.intellij.psi.impl.java.stubs.index.JavaShortClassNameIndex
 import com.intellij.psi.search.GlobalSearchScope
-import com.intellij.psi.stubs.StubIndex
 import it.zoo.spring.idea.plugin.model.*
 import it.zoo.spring.idea.plugin.storage.ProjectStorage
 import it.zoo.spring.idea.plugin.utils.SealedClassUtils
+import org.jetbrains.kotlin.idea.core.getPackage
 import org.jetbrains.kotlin.idea.refactoring.fqName.fqName
 import org.jetbrains.kotlin.idea.stubindex.KotlinClassShortNameIndex
 import org.jetbrains.kotlin.nj2k.postProcessing.type
@@ -27,8 +27,9 @@ class GenerateModelService(
 
     fun generate() {
         val converters = analytic()
+        val pack = PsiManager.getInstance(project).findDirectory(virtualFile)?.getPackage()?.qualifiedName ?: ""
         val files = converters.map {
-            val str = codeGenerator.formString(it)
+            val str = codeGenerator.formString(it, pack)
             KtPsiFactory(project).createFile("${it.name}.kt", str)
         }
 
@@ -131,6 +132,7 @@ class GenerateModelService(
                         ),
                         elements = convertedElements
                     )
+                    result.add(converter)
                 }
                 else -> TODO()
             }
