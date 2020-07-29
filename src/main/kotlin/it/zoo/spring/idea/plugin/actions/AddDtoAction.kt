@@ -4,6 +4,7 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.LangDataKeys
 import com.intellij.openapi.ui.popup.JBPopupFactory
+import com.intellij.psi.PsiManager
 import com.intellij.psi.util.PsiTreeUtil
 import it.zoo.spring.idea.plugin.storage.ProjectStorage
 import org.jetbrains.kotlin.psi.KtClass
@@ -22,6 +23,7 @@ class AddDtoAction : AnAction() {
 
     private fun extractPsiClass(anActionEvent: AnActionEvent): KtClass? {
         val psiFile = requireNotNull(anActionEvent.getData(LangDataKeys.PSI_FILE)) { "psiFile must not be null" }
-        return PsiTreeUtil.findChildOfType(psiFile, KtClass::class.java)
+        val editor = anActionEvent.getData(LangDataKeys.EDITOR)!!
+        return PsiTreeUtil.findElementOfClassAtOffset(psiFile, editor.caretModel.offset, KtClass::class.java, false)
     }
 }

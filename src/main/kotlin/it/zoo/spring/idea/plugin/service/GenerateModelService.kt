@@ -57,8 +57,10 @@ class GenerateModelService(
         val result = mutableListOf<Converter>()
         while (stack.isNotEmpty()) {
             val pair = stack.pop()
+            val model = pair.model
+            val dto = pair.dto
             when {
-                modelDto.isData() -> {
+                dto.isData() -> {
                     val pairs = analyticDataClass(pair)
                     val tasks = pairs.mapNotNull { it.first }
                     tasks.forEach { stack.push(it) }
@@ -77,11 +79,11 @@ class GenerateModelService(
                     )
                     result.add(converter)
                 }
-                modelDto.isEnum() -> {
+                dto.isEnum() -> {
                     val modelShortName = model.fqName!!.shortName().identifier
-                    val dtoShortName = modelDto.fqName!!.shortName().identifier
+                    val dtoShortName = dto.fqName!!.shortName().identifier
                     val convertedElements = model.declarations.map { declaration ->
-                        when (val dtoDeclaration = modelDto.declarations.firstOrNull { it.name == declaration.name }) {
+                        when (val dtoDeclaration = dto.declarations.firstOrNull { it.name == declaration.name }) {
                             null -> {
                                 ConvertedElement(
                                     from = "$modelShortName.${declaration.name}",
@@ -110,9 +112,9 @@ class GenerateModelService(
                     )
                     result.add(converter)
                 }
-                modelDto.isSealed() -> {
-                    val modelChildren = SealedClassUtils.findInheritorsOfSealedClass(modelDto, project)
-                    val dtoChildren = SealedClassUtils.findInheritorsOfSealedClass(modelDto, project)
+                dto.isSealed() -> {
+                    val modelChildren = SealedClassUtils.findInheritorsOfSealedClass(dto, project)
+                    val dtoChildren = SealedClassUtils.findInheritorsOfSealedClass(dto, project)
                     val convertedElements = modelChildren.map { modelClass ->
                         val dtoClass = dtoChildren.find { stupidMaxMatch(modelClass.name!!, it.name!!) }
                         ConvertedElement(
@@ -214,8 +216,8 @@ class GenerateModelService(
         modelParameterName: String,
         dtoParamter: KotlinType,
         modelParameter: KotlinType,
-        nullableType: ConvertedElement.Type,
-        type: ConvertedElement.Type
+        type: ConvertedElement.Type,
+        nullableType: ConvertedElement.Type
     ): Pair<DtoModelPair?, ConvertedElement> {
         val dtoShortName = dtoParamter.fqName?.shortName()?.identifier!!
         val modelShortName = modelParameter.fqName?.shortName()?.identifier!!

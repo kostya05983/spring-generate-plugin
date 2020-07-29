@@ -25,6 +25,7 @@ class AddModelAction : AnAction() {
 
     private fun extractPsiClass(anActionEvent: AnActionEvent): KtClass? {
         val psiFile = requireNotNull(anActionEvent.getData(LangDataKeys.PSI_FILE)) { "psiFile must not be null" }
-        return PsiTreeUtil.findChildOfType(psiFile, KtClass::class.java)
+        val editor = anActionEvent.getData(LangDataKeys.EDITOR)!!
+        return PsiTreeUtil.findElementOfClassAtOffset(psiFile, editor.caretModel.offset, KtClass::class.java, false)
     }
 }

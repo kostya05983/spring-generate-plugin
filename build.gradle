@@ -21,6 +21,7 @@ compileTestKotlin {
 }
 intellij {
     version '2019.3'
+    updateSinceUntilBuild=false
     plugins 'Kotlin', 'java'
 }
 patchPluginXml {
