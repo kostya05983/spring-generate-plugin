@@ -71,7 +71,10 @@ class GenerateModelService(
                     val converter = sealedAnalyticStrategy.analytic(model, dto, stack)
                     result.add(converter)
                 }
-                else -> classAnalyticStrategy.analytic(model, dto, stack)
+                else -> {
+                    val converter = classAnalyticStrategy.analytic(model, dto, stack)
+                    result.add(converter)
+                }
             }
         }
         return result

@@ -42,7 +42,7 @@ class CodeGenerator {
             is SealedClassConverter -> {
                 sb.append("return when(source) {")
                 for (it in converter.elements) {
-                    sb.append("is ${it.from} -> ${it.to}.convert(source)\n")
+                    sb.append("is ${it.from} -> ${it.to}Converter.convert(source)\n")
                 }
                 sb.append("}\n")
             }

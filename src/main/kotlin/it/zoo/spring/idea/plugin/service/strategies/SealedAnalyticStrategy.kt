@@ -20,6 +20,9 @@ class SealedAnalyticStrategy(
     ): Converter {
         val modelChildren = SealedClassUtils.findInheritorsOfSealedClass(model, project)
         val dtoChildren = SealedClassUtils.findInheritorsOfSealedClass(dto, project)
+        val childrenImports = modelChildren.mapNotNull {
+            it.fqName?.asString()
+        }
         val convertedElements = modelChildren.map { modelClass ->
             val dtoClass = dtoChildren.find { stupidMaxMatch(modelClass.name!!, it.name!!) }
             dtoClass?.let {
@@ -44,7 +47,7 @@ class SealedAnalyticStrategy(
             imports = listOfNotNull(
                 dto.fqName?.asString(),
                 model.fqName?.asString()
-            ),
+            ) + childrenImports,
             elements = convertedElements
         )
     }
