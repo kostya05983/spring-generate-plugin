@@ -14,7 +14,7 @@ class CodeGenerator {
         sb.append("object ${converter.name}: Converter<${converter.from}, ${converter.to}>{\n")
         sb.append("override fun convert(source: ${converter.from}): ${converter.to} {\n")
         when (converter) {
-            is DataClassConverter -> {
+            is ClassConverter -> {
                 sb.append("return ${converter.to}(\n")
 
                 for (it in converter.elements) {

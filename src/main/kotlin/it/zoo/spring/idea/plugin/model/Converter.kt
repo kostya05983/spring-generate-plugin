@@ -7,7 +7,7 @@ sealed class Converter {
     abstract val imports: List<String>
 }
 
-data class DataClassConverter(
+data class ClassConverter(
     override val name: String,
     override val from: String,
     override val to: String,
