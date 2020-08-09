@@ -52,7 +52,7 @@ class AnalyticClassStrategy(
                 modelValueParameter == null -> {
                     Pair(null, ConvertedElement(valueParameter.name!!, "TODO()", null, ConvertedElement.Type.SIMPLE))
                 }
-                modelValueParameter.type() == valueParameter.type() -> {
+                modelValueParameter.type()?.fqName == valueParameter.type()?.fqName -> {
                     Pair(
                         null, ConvertedElement(
                             valueParameter.name!!,
@@ -62,7 +62,7 @@ class AnalyticClassStrategy(
                         )
                     )
                 }
-                modelValueParameter.type() != valueParameter.type() -> {
+                modelValueParameter.type()?.fqName != valueParameter.type()?.fqName -> {
                     val dtoShortName = valueParameter.type()?.fqName?.shortName()?.identifier!!
                     val modelShortName = modelValueParameter.type()?.fqName?.shortName()?.identifier!!
                     val dtoModelType = valueParameter.type()!!
