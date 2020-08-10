@@ -16,14 +16,31 @@ class CodeGenerator {
         when (converter) {
             is ClassConverter -> {
                 sb.append("return ${converter.to}(\n")
-
                 for (it in converter.elements) {
-                    when (it.type) {
-                        ConvertedElement.Type.SIMPLE -> sb.append("${it.from} = source.${it.to}")
-                        ConvertedElement.Type.NULLABLE_CONVERT -> sb.append("${it.from}=source.${it.to}?.let{${it.toType}Converter.convert(it)}")
-                        ConvertedElement.Type.CONVERT -> sb.append("${it.from}=${it.toType}Converter.convert(source.${it.to})")
-                        ConvertedElement.Type.LIST_CONVERT -> sb.append("${it.from}=source.${it.to}?.map{ ${it.toType}Converter.convert(it) }")
-                        ConvertedElement.Type.NULLABLE_LIST_CONVERT -> sb.append("${it.from}=source.${it.to}?.map{ ${it.toType}Converter.convert(it) }")
+                    when (it) {
+                        is SimpleConvertedElement -> {
+                            sb.append("${it.from} = source.${it.to}")
+                        }
+                        is ConvertConvertedElement -> {
+                            if (it.isNullableConvert) {
+                                sb.append("${it.from}=source.${it.to}?.let{${it.toType}Converter.convert(it)}")
+                            } else {
+                                sb.append("${it.from}=${it.toType}Converter.convert(source.${it.to})")
+                            }
+                        }
+                        is ListConvertedElement -> {
+                            if (it.isNullableConvert) {
+                                sb.append("${it.from}=source.${it.to}?.map{")
+                            } else {
+                                sb.append("${it.from}=source.${it.to}.map{")
+                            }
+                            val element = it.element as ConvertConvertedElement
+                            if (element.isNullableConvert) {
+                                sb.append("it?.let{${element.toType}Converter.convert(it)}}")
+                            } else {
+                                sb.append("${element.toType}Converter.convert(it)}")
+                            }
+                        }
                     }
                     if (it == converter.elements.last()) {
                         sb.append("\n")

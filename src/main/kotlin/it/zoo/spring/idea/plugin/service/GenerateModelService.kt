@@ -41,7 +41,11 @@ class GenerateModelService(
         }
         application.runWriteAction {
             files.forEach {
-                directory.add(it)
+                try {
+                    directory.add(it)
+                } catch (ex: Exception) {
+                    println("Can't add file ${it.name} $ex")
+                }
             }
         }
     }

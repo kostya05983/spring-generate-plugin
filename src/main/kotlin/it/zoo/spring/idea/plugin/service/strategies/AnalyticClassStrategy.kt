@@ -2,10 +2,7 @@ package it.zoo.spring.idea.plugin.service.strategies
 
 import com.intellij.openapi.project.Project
 import com.intellij.psi.search.GlobalSearchScope
-import it.zoo.spring.idea.plugin.model.ConvertedElement
-import it.zoo.spring.idea.plugin.model.Converter
-import it.zoo.spring.idea.plugin.model.ClassConverter
-import it.zoo.spring.idea.plugin.model.DtoModelPair
+import it.zoo.spring.idea.plugin.model.*
 import it.zoo.spring.idea.plugin.service.AnalyticStrategy
 import org.jetbrains.kotlin.idea.refactoring.fqName.fqName
 import org.jetbrains.kotlin.idea.stubindex.KotlinClassShortNameIndex
@@ -56,15 +53,20 @@ class AnalyticClassStrategy(
             val valueType = valueParameter.type()!!
             when {
                 modelType == null -> {
-                    Pair(null, ConvertedElement(valueParameter.name!!, "TODO()", null, ConvertedElement.Type.SIMPLE))
+                    Pair(
+                        null,
+                        SimpleConvertedElement(
+                            valueParameter.name!!,
+                            "TODO()"
+                        )
+                    )
                 }
                 modelType.equalsConverted(valueType) -> {
                     Pair(
-                        null, ConvertedElement(
+                        null,
+                        SimpleConvertedElement(
                             valueParameter.name!!,
-                            modelValueParameter.name!!,
-                            null,
-                            ConvertedElement.Type.SIMPLE
+                            modelValueParameter.name!!
                         )
                     )
                 }
@@ -72,31 +74,34 @@ class AnalyticClassStrategy(
                     val dtoShortName = valueType.fqName?.shortName()?.identifier!!
                     val modelShortName = modelType.fqName?.shortName()?.identifier!!
                     if (dtoShortName == "List" && modelShortName == "List") {
-                        convertUnmatch(
+                        val (task, convertedElement) = convertUnmatch(
                             valueParameter.name!!,
                             modelValueParameter.name!!,
                             valueType.arguments[0].type,
-                            modelType.arguments[0].type,
-                            ConvertedElement.Type.LIST_CONVERT,
-                            ConvertedElement.Type.NULLABLE_LIST_CONVERT
+                            modelType.arguments[0].type
+                        )
+                        Pair(
+                            task,
+                            ListConvertedElement(
+                                isNullableConvert = modelType.isMarkedNullable,
+                                from = valueParameter.name!!,
+                                to = modelValueParameter.name!!,
+                                element = convertedElement
+                            )
                         )
                     } else {
                         convertUnmatch(
                             valueParameter.name!!,
                             modelValueParameter.name!!,
                             valueType,
-                            modelType,
-                            ConvertedElement.Type.CONVERT,
-                            ConvertedElement.Type.NULLABLE_CONVERT
+                            modelType
                         )
                     }
                 }
                 else -> Pair(
-                    null, ConvertedElement(
+                    null, SimpleConvertedElement(
                         valueParameter.name!!,
-                        "TODO()",
-                        null,
-                        ConvertedElement.Type.SIMPLE
+                        "TODO()"
                     )
                 )
             }
@@ -106,12 +111,10 @@ class AnalyticClassStrategy(
     private fun convertUnmatch(
         dtoParameterName: String,
         modelParameterName: String,
-        dtoParamter: KotlinType,
-        modelParameter: KotlinType,
-        type: ConvertedElement.Type,
-        nullableType: ConvertedElement.Type
+        dtoParameter: KotlinType,
+        modelParameter: KotlinType
     ): Pair<DtoModelPair?, ConvertedElement> {
-        val dtoShortName = dtoParamter.fqName?.shortName()?.identifier!!
+        val dtoShortName = dtoParameter.fqName?.shortName()?.identifier!!
         val modelShortName = modelParameter.fqName?.shortName()?.identifier!!
 
         val dtoKClass = KotlinClassShortNameIndex.getInstance()
@@ -123,24 +126,13 @@ class AnalyticClassStrategy(
             modelKClass
         ) else null
 
-        return if (dtoParamter.isMarkedNullable) {
-            Pair(
-                task, ConvertedElement(
-                    dtoParameterName,
-                    modelParameterName,
-                    dtoShortName,
-                    nullableType
-                )
+        return Pair(
+            task, ConvertConvertedElement(
+                dtoParameter.isMarkedNullable,
+                dtoParameterName,
+                modelParameterName,
+                dtoShortName
             )
-        } else {
-            Pair(
-                task, ConvertedElement(
-                    dtoParameterName,
-                    modelParameterName,
-                    dtoShortName,
-                    type
-                )
-            )
-        }
+        )
     }
 }

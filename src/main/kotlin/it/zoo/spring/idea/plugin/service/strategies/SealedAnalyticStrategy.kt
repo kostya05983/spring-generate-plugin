@@ -1,10 +1,7 @@
 package it.zoo.spring.idea.plugin.service.strategies
 
 import com.intellij.openapi.project.Project
-import it.zoo.spring.idea.plugin.model.ConvertedElement
-import it.zoo.spring.idea.plugin.model.Converter
-import it.zoo.spring.idea.plugin.model.DtoModelPair
-import it.zoo.spring.idea.plugin.model.SealedClassConverter
+import it.zoo.spring.idea.plugin.model.*
 import it.zoo.spring.idea.plugin.service.AnalyticStrategy
 import it.zoo.spring.idea.plugin.utils.SealedClassUtils
 import org.jetbrains.kotlin.psi.KtClass
@@ -33,10 +30,9 @@ class SealedAnalyticStrategy(
                 stack.push(pair)
             }
 
-            ConvertedElement(
+            SimpleConvertedElement(
                 from = modelClass.name!!,
-                to = dtoClass?.name ?: "TODO()",
-                type = ConvertedElement.Type.SIMPLE
+                to = dtoClass?.name ?: "TODO()"
             )
         }
 
