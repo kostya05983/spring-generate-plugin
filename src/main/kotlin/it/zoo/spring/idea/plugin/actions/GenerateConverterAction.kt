@@ -7,7 +7,7 @@ import it.zoo.spring.idea.plugin.service.GenerateModelService
 
 class GenerateConverterAction : AnAction() {
     override fun actionPerformed(e: AnActionEvent) {
-        val virtualFile = e.getData(LangDataKeys.VIRTUAL_FILE) ?: return // TODO
+        val virtualFile = e.getData(LangDataKeys.VIRTUAL_FILE) ?: return
         val service = GenerateModelService(virtualFile, e.project!!)
         service.generate()
     }

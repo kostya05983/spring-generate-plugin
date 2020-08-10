@@ -22,17 +22,17 @@
         <group id="spring-choose-actions" text="Spring Generate" popup="true">
             <add-to-group group-id="EditorPopupMenu" anchor="first"/>
         </group>
-        <action class="it.zoo.spring.idea.plugin.actions.AddModelAction" text="Добавить Модель" id="AddModel">
+        <action class="it.zoo.spring.idea.plugin.actions.AddModelAction" text="Transform From Model" id="AddModel">
             <add-to-group group-id="spring-choose-actions" anchor="after" relative-to-action="AddModel"/>
         </action>
-        <action class="it.zoo.spring.idea.plugin.actions.AddDtoAction" text="Добавить DTO" id="AddDTO">
+        <action class="it.zoo.spring.idea.plugin.actions.AddDtoAction" text="Transform In Model" id="AddDTO">
             <add-to-group group-id="spring-choose-actions" anchor="after" relative-to-action="AddDTO"/>
         </action>
 
         <group id="spring-generations-actions" text="Spring Generate" popup="true">
             <add-to-group group-id="ProjectViewPopupMenu" anchor="first"/>
         </group>
-        <action class="it.zoo.spring.idea.plugin.actions.GenerateConverterAction" text="Сгенерировать Конвертер"
+        <action class="it.zoo.spring.idea.plugin.actions.GenerateConverterAction" text="Generate Converters"
                 id="GenerateConverter">
             <add-to-group group-id="spring-generations-actions" anchor="after" relative-to-action="GenerateConverter"/>
         </action>
