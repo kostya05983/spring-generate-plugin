@@ -3,21 +3,15 @@
     <name>spring-generation-tools</name>
     <version>1.0.0</version>
     <idea-version since-build="162"/>
-    <vendor email="kostya05983@mail.ru" url="http://www.yourcompany.com">YourCompany</vendor>
+    <vendor email="kostya05983@mail.ru"></vendor>
 
     <description><![CDATA[
-    Enter short description for your plugin here.<br>
-    <em>most HTML tags may be used</em>
+    Plugin allows to generate model to dto converts in kotlin <br>
     ]]></description>
 
     <depends>org.jetbrains.kotlin</depends>
     <depends>com.intellij.java</depends>
 
-    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
-         on how to target different products -->
-    <!-- uncomment to enable plugin in all products
-    <depends>com.intellij.modules.lang</depends>
-    -->
     <actions>
         <group id="spring-choose-actions" text="Spring Generate" popup="true">
             <add-to-group group-id="EditorPopupMenu" anchor="first"/>

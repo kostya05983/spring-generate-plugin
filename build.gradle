@@ -21,11 +21,11 @@ compileTestKotlin {
 }
 intellij {
     version '2019.3'
-    updateSinceUntilBuild=false
+    updateSinceUntilBuild = false
     plugins 'Kotlin', 'java'
 }
 patchPluginXml {
     changeNotes """
-      Add change notes here.<br>
-      <em>most HTML tags may be used</em>"""
+      1.0 - realize the most used ways to convert entities
+      """
 }
