@@ -40,6 +40,10 @@ class AnalyticClassStrategy(
         )
     }
 
+    private fun KotlinType.equalsConverted(other: KotlinType): Boolean {
+        return this.fqName == other.fqName && this.arguments == other.arguments
+    }
+
     private fun analyticDataClass(
         model: KtClass,
         dto: KtClass
@@ -48,11 +52,13 @@ class AnalyticClassStrategy(
         return parameters.map { valueParameter ->
             val modelValueParameter =
                 model.primaryConstructorParameters.firstOrNull { it.name == valueParameter.name }
+            val modelType = modelValueParameter?.type()
+            val valueType = valueParameter.type()!!
             when {
-                modelValueParameter == null -> {
+                modelType == null -> {
                     Pair(null, ConvertedElement(valueParameter.name!!, "TODO()", null, ConvertedElement.Type.SIMPLE))
                 }
-                modelValueParameter.type()?.fqName == valueParameter.type()?.fqName -> {
+                modelType.equalsConverted(valueType) -> {
                     Pair(
                         null, ConvertedElement(
                             valueParameter.name!!,
@@ -62,16 +68,14 @@ class AnalyticClassStrategy(
                         )
                     )
                 }
-                modelValueParameter.type()?.fqName != valueParameter.type()?.fqName -> {
-                    val dtoShortName = valueParameter.type()?.fqName?.shortName()?.identifier!!
-                    val modelShortName = modelValueParameter.type()?.fqName?.shortName()?.identifier!!
-                    val dtoModelType = valueParameter.type()!!
-                    val modelType = modelValueParameter.type()!!
+                modelType.equalsConverted(valueType).not() -> {
+                    val dtoShortName = valueType.fqName?.shortName()?.identifier!!
+                    val modelShortName = modelType.fqName?.shortName()?.identifier!!
                     if (dtoShortName == "List" && modelShortName == "List") {
                         convertUnmatch(
                             valueParameter.name!!,
                             modelValueParameter.name!!,
-                            dtoModelType.arguments[0].type,
+                            valueType.arguments[0].type,
                             modelType.arguments[0].type,
                             ConvertedElement.Type.LIST_CONVERT,
                             ConvertedElement.Type.NULLABLE_LIST_CONVERT
@@ -80,7 +84,7 @@ class AnalyticClassStrategy(
                         convertUnmatch(
                             valueParameter.name!!,
                             modelValueParameter.name!!,
-                            dtoModelType,
+                            valueType,
                             modelType,
                             ConvertedElement.Type.CONVERT,
                             ConvertedElement.Type.NULLABLE_CONVERT
