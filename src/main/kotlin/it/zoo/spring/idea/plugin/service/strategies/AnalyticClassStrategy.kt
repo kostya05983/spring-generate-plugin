@@ -4,6 +4,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.psi.search.GlobalSearchScope
 import it.zoo.spring.idea.plugin.model.*
 import it.zoo.spring.idea.plugin.service.AnalyticStrategy
+import it.zoo.spring.idea.plugin.utils.KotlinIndexUtils
 import org.jetbrains.kotlin.idea.refactoring.fqName.fqName
 import org.jetbrains.kotlin.idea.stubindex.KotlinClassShortNameIndex
 import org.jetbrains.kotlin.nj2k.postProcessing.type
@@ -114,13 +115,14 @@ class AnalyticClassStrategy(
         dtoParameter: KotlinType,
         modelParameter: KotlinType
     ): Pair<DtoModelPair?, ConvertedElement> {
-        val dtoShortName = dtoParameter.fqName?.shortName()?.identifier!!
-        val modelShortName = modelParameter.fqName?.shortName()?.identifier!!
+        val dtoShortName = dtoParameter.fqName?.shortName()?.identifier
 
-        val dtoKClass = KotlinClassShortNameIndex.getInstance()
-            .get(dtoShortName, project, GlobalSearchScope.allScope(project)).firstOrNull() as? KtClass
-        val modelKClass = KotlinClassShortNameIndex.getInstance()
-            .get(modelShortName, project, GlobalSearchScope.allScope(project)).firstOrNull() as? KtClass
+        val dtoKClass = dtoParameter.fqName?.let {
+            KotlinIndexUtils.getKClass(it.asString(), project)
+        }
+        val modelKClass = modelParameter.fqName?.let {
+            KotlinIndexUtils.getKClass(it.asString(), project)
+        }
         val task = if (dtoKClass != null && modelKClass != null) DtoModelPair(
             dtoKClass,
             modelKClass
@@ -131,7 +133,7 @@ class AnalyticClassStrategy(
                 dtoParameter.isMarkedNullable,
                 dtoParameterName,
                 modelParameterName,
-                dtoShortName
+                dtoShortName ?: "TODO()"
             )
         )
     }
