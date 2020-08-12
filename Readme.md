@@ -1,6 +1,7 @@
 ### Spring Generation plugin
 
-####Summary
+#### Summary
+
 Plugin allows to generate model to dto converts in kotlin. 
 
 This open source plugin can help you to generate a lot of converters code in kotlin.
@@ -39,6 +40,7 @@ Yahoo and you get the result:
 
 ```kotlin
 package converters.test
+
 import org.springframework.core.convert.converter.Converter
 import model.Test
 import model.TestDto
