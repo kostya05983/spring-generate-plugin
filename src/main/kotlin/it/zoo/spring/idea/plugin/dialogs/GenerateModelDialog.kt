@@ -14,7 +14,7 @@ class GenerateModelDialog(
     private val ktClass: KtClass
 ) : BaseDialog(ktClass.project) {
 
-    override fun createCenterPanel(): JComponent? {
+    override fun createCenterPanel(): JComponent {
         val jComponent = JPanel()
         jComponent.layout = BoxLayout(jComponent, BoxLayout.Y_AXIS)
         val removePrefixField = createRemovePrefix()

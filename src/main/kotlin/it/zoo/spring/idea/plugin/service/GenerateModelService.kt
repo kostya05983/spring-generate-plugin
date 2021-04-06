@@ -47,8 +47,8 @@ class GenerateModelService(
         val directory = PsiDirectoryFactory.getInstance(project).createDirectory(virtualFile)
         files.forEach {
             CodeStyleManager.getInstance(project).reformat(it)
-
         }
+
         application.runWriteAction {
             files.forEach {
                 try {
