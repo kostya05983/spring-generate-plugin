@@ -58,7 +58,7 @@ class AnalyticClassStrategy(
                         null,
                         SimpleConvertedElement(
                             valueParameter.name!!,
-                            "TODO()"
+                            null
                         )
                     )
                 }
@@ -102,7 +102,7 @@ class AnalyticClassStrategy(
                 else -> Pair(
                     null, SimpleConvertedElement(
                         valueParameter.name!!,
-                        "TODO()"
+                        null
                     )
                 )
             }
@@ -133,7 +133,7 @@ class AnalyticClassStrategy(
                 dtoParameter.isMarkedNullable,
                 dtoParameterName,
                 modelParameterName,
-                dtoShortName ?: "TODO()"
+                dtoShortName
             )
         )
     }

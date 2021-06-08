@@ -21,7 +21,7 @@ class EnumAnalyticStrategy(
                 null -> {
                     SimpleConvertedElement(
                         from = "$modelShortName.${declaration.name}",
-                        to = "TODO()"
+                        to = null
                     )
                 }
                 else -> {

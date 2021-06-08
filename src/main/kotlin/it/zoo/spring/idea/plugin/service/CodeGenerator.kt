@@ -19,13 +19,26 @@ class CodeGenerator {
                 for (it in converter.elements) {
                     when (it) {
                         is SimpleConvertedElement -> {
-                            sb.append("${it.from} = source.${it.to}")
+                            if (it.to == null) {
+                                sb.append("${it.from} = TODO()")
+                            } else {
+                                sb.append("${it.from} = source.${it.to}")
+                            }
                         }
                         is ConvertConvertedElement -> {
                             if (it.isNullableConvert) {
-                                sb.append("${it.from}=source.${it.to}?.let{${it.toType}Converter.convert(it)}")
+                                if (it.toType != null) {
+                                    sb.append("${it.from} = source.${it.to}?.let{${it.toType}Converter.convert(it)}")
+                                } else {
+                                    sb.append("${it.from} = source.${it.to}?.let{ TODO() }")
+                                }
+
                             } else {
-                                sb.append("${it.from}=${it.toType}Converter.convert(source.${it.to})")
+                                if (it.toType != null) {
+                                    sb.append("${it.from} = ${it.toType}Converter.convert(source.${it.to})")
+                                } else {
+                                    sb.append("${it.from} = TODO()")
+                                }
                             }
                         }
                         is ListConvertedElement -> {
@@ -52,14 +65,23 @@ class CodeGenerator {
             }
             is EnumClassConverter -> {
                 sb.append("return when(source) {")
-                for (it in converter.elements)
-                    sb.append("${it.from} -> ${it.to}\n")
+                for (it in converter.elements) {
+                    if (it.to != null) {
+                        sb.append("${it.from} -> ${it.to}\n")
+                    } else {
+                        sb.append("${it.from} -> TODO()\n")
+                    }
+                }
                 sb.append("}\n")
             }
             is SealedClassConverter -> {
                 sb.append("return when(source) {")
                 for (it in converter.elements) {
-                    sb.append("is ${it.from} -> ${it.to}Converter.convert(source)\n")
+                    if (it.to != null) {
+                        sb.append("is ${it.from} -> ${it.to}Converter.convert(source)\n")
+                    } else {
+                        sb.append("is ${it.from} -> TODO()\n")
+                    }
                 }
                 sb.append("}\n")
             }

@@ -32,7 +32,7 @@ class SealedAnalyticStrategy(
 
             SimpleConvertedElement(
                 from = modelClass.name!!,
-                to = dtoClass?.name ?: "TODO()"
+                to = dtoClass?.name
             )
         }
 
