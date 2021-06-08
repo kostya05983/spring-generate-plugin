@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>spring-generation-tools</id>
     <name>spring-generation-tools</name>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <idea-version since-build="193"/>
     <vendor email="kostya05983@mail.ru"></vendor>
 
