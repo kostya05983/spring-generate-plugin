@@ -47,4 +47,13 @@
             <add-to-group group-id="spring-generations-actions" anchor="after" relative-to-action="GenerateConverter"/>
         </action>
     </actions>
+    <change-notes>
+        <![CDATA[
+      <html>
+      1.0 - realize the most used ways to convert entities
+      <br/>
+      1.0.1 - fixes bug with wrong position of TODO()
+      </html>
+      ]]>
+    </change-notes>
 </idea-plugin>

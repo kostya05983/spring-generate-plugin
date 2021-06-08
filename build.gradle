@@ -22,9 +22,3 @@ intellij {
     updateSinceUntilBuild = false
     plugins 'Kotlin', 'java'
 }
-patchPluginXml {
-    changeNotes """
-      1.0 - realize the most used ways to convert entities
-      1.0.1 - fixes bug with wrong position of TODO()
-      """
-}
