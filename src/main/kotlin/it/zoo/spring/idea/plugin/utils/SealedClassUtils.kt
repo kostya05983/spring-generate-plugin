@@ -1,7 +1,7 @@
 package it.zoo.spring.idea.plugin.utils
 
 import com.intellij.openapi.project.Project
-import org.jetbrains.kotlin.idea.refactoring.fqName.getKotlinFqName
+import org.jetbrains.kotlin.idea.base.psi.kotlinFqName
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtClassBody
 import org.jetbrains.kotlin.psi.psiUtil.getSuperNames
@@ -14,7 +14,7 @@ object SealedClassUtils {
     private fun findInFileSealed(model: KtClass, project: Project): List<KtClass> {
         val filtered = model.containingKtFile.classes.filter { it.superClass?.name == model.name }
         return filtered.mapNotNull {
-            it.getKotlinFqName()?.let {
+            it.kotlinFqName?.let {
                 KotlinIndexUtils.getKClass(it.asString(), project)
             }
         }

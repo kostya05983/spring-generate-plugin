@@ -7,7 +7,7 @@ import org.jetbrains.kotlin.psi.KtClass
 
 object KotlinIndexUtils {
     fun getKClass(fqName: String, project: Project): KtClass? {
-        return KotlinFullClassNameIndex.getInstance().get(fqName, project, GlobalSearchScope.allScope(project))
+        return KotlinFullClassNameIndex.get(fqName, project, GlobalSearchScope.allScope(project))
             .firstOrNull {
                 it.fqName?.asString() == fqName
             } as? KtClass

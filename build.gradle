@@ -18,7 +18,7 @@ compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }
 intellij {
-    version.set("2021.3")
+    version.set("2022.3")
     plugins = ['java', 'Kotlin']
     updateSinceUntilBuild = false
 }

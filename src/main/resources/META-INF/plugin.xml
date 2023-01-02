@@ -53,6 +53,8 @@
       1.0 - realize the most used ways to convert entities
       <br/>
       1.0.1 - fixes bug with wrong position of TODO()
+      <br/>
+      1.0.2 - delete usages of deprecated api
       </html>
       ]]>
     </change-notes>

@@ -1,14 +1,14 @@
 package it.zoo.spring.idea.plugin.service.strategies
 
 import com.intellij.openapi.project.Project
-import com.intellij.psi.search.GlobalSearchScope
 import it.zoo.spring.idea.plugin.model.*
 import it.zoo.spring.idea.plugin.service.AnalyticStrategy
 import it.zoo.spring.idea.plugin.utils.KotlinIndexUtils
+import org.jetbrains.kotlin.descriptors.CallableDescriptor
+import org.jetbrains.kotlin.idea.caches.resolve.resolveToDescriptorIfAny
 import org.jetbrains.kotlin.idea.refactoring.fqName.fqName
-import org.jetbrains.kotlin.idea.stubindex.KotlinClassShortNameIndex
-import org.jetbrains.kotlin.nj2k.postProcessing.type
 import org.jetbrains.kotlin.psi.KtClass
+import org.jetbrains.kotlin.psi.KtDeclaration
 import org.jetbrains.kotlin.types.KotlinType
 import java.util.*
 
@@ -137,4 +137,7 @@ class AnalyticClassStrategy(
             )
         )
     }
+
+    private fun KtDeclaration.type() =
+        (resolveToDescriptorIfAny() as? CallableDescriptor)?.returnType
 }
