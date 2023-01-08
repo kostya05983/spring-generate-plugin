@@ -2,7 +2,7 @@
     <id>spring-generation-tools</id>
     <name>spring-generation-tools</name>
     <version>1.0.2</version>
-    <idea-version since-build="193"/>
+    <idea-version since-build="223"/>
     <vendor email="kostya05983@mail.ru"></vendor>
 
     <description><![CDATA[
