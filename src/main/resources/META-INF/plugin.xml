@@ -1,9 +1,9 @@
 <idea-plugin>
     <id>spring-generation-tools</id>
     <name>spring-generation-tools</name>
-    <version>1.0.2</version>
+    <version>1.0.3</version>
     <idea-version since-build="223"/>
-    <vendor email="kostya05983@mail.ru"></vendor>
+    <vendor email="kostya05983@mail.ru">Konstantin Volivach</vendor>
 
     <description><![CDATA[
     Plugin allows to generate model to dto converts in kotlin <br>
