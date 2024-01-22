@@ -4,5 +4,5 @@ import org.jetbrains.kotlin.psi.KtClass
 
 object ProjectStorage {
     var model: KtClass? = null
-    var modelDto: KtClass? = null
+    var dto: KtClass? = null
 }

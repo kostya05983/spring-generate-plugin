@@ -1,18 +1,37 @@
-package it.zoo.spring.idea.plugin.service
+package it.zoo.spring.idea.plugin.service.generators
 
 import it.zoo.spring.idea.plugin.model.*
-import java.lang.StringBuilder
 
-class CodeGenerator {
-    fun formString(converter: Converter, pack: String): String {
+class KotlinConvertersGenerator : ConverterGenerator {
+
+    override fun getString(converter: Converter, packageName: String): String {
         val sb = StringBuilder()
-        sb.append("package $pack\n")
-        sb.append("import org.springframework.core.convert.converter.Converter\n")
+        sb.append("package $packageName\n")
         converter.imports.forEach {
             sb.append("import $it\n")
         }
-        sb.append("object ${converter.name}: Converter<${converter.from}, ${converter.to}>{\n")
-        sb.append("override fun convert(source: ${converter.from}): ${converter.to} {\n")
+
+        val postfix = if (converter.to.lowercase().contains("dto")) {
+            "Dto"
+        } else {
+            "Model"
+        }
+        val reversePostfix = if (converter.to.lowercase().contains("dto")) {
+            "Model"
+        } else {
+            "Dto"
+        }
+
+        //todo нужно поправить импорты
+        //todo иногда из enum-ов лезут и их переменные, это тоже нужно поправить
+        getBody(sb, converter, postfix)
+        getBody(sb, converter.reverse(), reversePostfix)
+
+        return sb.toString()
+    }
+
+    private fun getBody(sb: StringBuilder, converter: Converter, postfix: String) {
+        sb.append("fun ${converter.from}.to$postfix(): ${converter.to} {\n")
         when (converter) {
             is ClassConverter -> {
                 sb.append("return ${converter.to}(\n")
@@ -22,36 +41,38 @@ class CodeGenerator {
                             if (it.to == null) {
                                 sb.append("${it.from} = TODO()")
                             } else {
-                                sb.append("${it.from} = source.${it.to}")
+                                sb.append("${it.from} = ${it.to}")
                             }
                         }
+
                         is ConvertConvertedElement -> {
                             if (it.isNullableConvert) {
                                 if (it.toType != null) {
-                                    sb.append("${it.from} = source.${it.to}?.let{${it.toType}Converter.convert(it)}")
+                                    sb.append("${it.from} = ${it.to}?.to$postfix()")
                                 } else {
-                                    sb.append("${it.from} = source.${it.to}?.let{ TODO() }")
+                                    sb.append("${it.from} = TODO()")
                                 }
 
                             } else {
                                 if (it.toType != null) {
-                                    sb.append("${it.from} = ${it.toType}Converter.convert(source.${it.to})")
+                                    sb.append("${it.from} = ${it.to}.to$postfix()")
                                 } else {
                                     sb.append("${it.from} = TODO()")
                                 }
                             }
                         }
+
                         is ListConvertedElement -> {
                             if (it.isNullableConvert) {
-                                sb.append("${it.from}=source.${it.to}?.map{")
+                                sb.append("${it.from}=${it.to}?.map{ ")
                             } else {
-                                sb.append("${it.from}=source.${it.to}.map{")
+                                sb.append("${it.from}=${it.to}.map{ ")
                             }
                             val element = it.element as ConvertConvertedElement
                             if (element.isNullableConvert) {
-                                sb.append("it?.let{${element.toType}Converter.convert(it)}}")
+                                sb.append("it?.to$postfix() }")
                             } else {
-                                sb.append("${element.toType}Converter.convert(it)}")
+                                sb.append("it.to$postfix() }")
                             }
                         }
                     }
@@ -63,8 +84,9 @@ class CodeGenerator {
                 }
                 sb.append(")\n")
             }
+
             is EnumClassConverter -> {
-                sb.append("return when(source) {")
+                sb.append("return when(this) {\n")
                 for (it in converter.elements) {
                     if (it.to != null) {
                         sb.append("${it.from} -> ${it.to}\n")
@@ -74,11 +96,12 @@ class CodeGenerator {
                 }
                 sb.append("}\n")
             }
+
             is SealedClassConverter -> {
-                sb.append("return when(source) {")
+                sb.append("return when(this) {\n")
                 for (it in converter.elements) {
                     if (it.to != null) {
-                        sb.append("is ${it.from} -> ${it.to}Converter.convert(source)\n")
+                        sb.append("is ${it.from} -> this.to$postfix()\n")
                     } else {
                         sb.append("is ${it.from} -> TODO()\n")
                     }
@@ -87,7 +110,5 @@ class CodeGenerator {
             }
         }
         sb.append("}\n")
-        sb.append("}\n")
-        return sb.toString()
     }
 }

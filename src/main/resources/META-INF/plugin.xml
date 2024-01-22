@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>spring-generation-tools</id>
     <name>spring-generation-tools</name>
-    <version>1.0.3</version>
+    <version>1.1.0</version>
     <idea-version since-build="223"/>
     <vendor email="kostya05983@mail.ru">Konstantin Volivach</vendor>
 
@@ -30,7 +30,7 @@
 
     <actions>
         <group id="spring-choose-actions" text="Spring Generate" popup="true">
-            <add-to-group group-id="EditorPopupMenu" anchor="first"/>
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
         </group>
         <action class="it.zoo.spring.idea.plugin.actions.AddModelAction" text="Transform From Model" id="AddModel">
             <add-to-group group-id="spring-choose-actions" anchor="after" relative-to-action="AddModel"/>
@@ -40,11 +40,15 @@
         </action>
 
         <group id="spring-generations-actions" text="Spring Generate" popup="true">
-            <add-to-group group-id="ProjectViewPopupMenu" anchor="first"/>
+            <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
         </group>
-        <action class="it.zoo.spring.idea.plugin.actions.GenerateConverterAction" text="Generate Converters"
-                id="GenerateConverter">
-            <add-to-group group-id="spring-generations-actions" anchor="after" relative-to-action="GenerateConverter"/>
+        <action class="it.zoo.spring.idea.plugin.actions.GenerateSpringConverterAction" text="Generate Converters in Spring Way"
+                id="GenerateSpringConverters">
+            <add-to-group group-id="spring-generations-actions" anchor="after" relative-to-action="GenerateSpringConverters"/>
+        </action>
+        <action class="it.zoo.spring.idea.plugin.actions.GenerateKotlinConverterAction" text="Generate Converters in Kotlin Way"
+                id="GenerateKotlinConverters">
+            <add-to-group group-id="spring-generations-actions" anchor="after" relative-to-action="GenerateKotlinConverters"/>
         </action>
     </actions>
     <change-notes>
@@ -55,6 +59,8 @@
       1.0.1 - fixes bug with wrong position of TODO()
       <br/>
       1.0.2 - delete usages of deprecated api
+      <br/>
+      1.1.0 - add kotlin style of converters
       </html>
       ]]>
     </change-notes>

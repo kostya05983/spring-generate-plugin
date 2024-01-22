@@ -2,7 +2,8 @@ package it.zoo.spring.idea.plugin.service.strategies
 
 import com.intellij.openapi.project.Project
 import it.zoo.spring.idea.plugin.model.*
-import it.zoo.spring.idea.plugin.service.AnalyticStrategy
+import it.zoo.spring.idea.plugin.service.AnalyseStrategy
+import it.zoo.spring.idea.plugin.service.GeneratorStyle
 import it.zoo.spring.idea.plugin.utils.KotlinIndexUtils
 import org.jetbrains.kotlin.descriptors.CallableDescriptor
 import org.jetbrains.kotlin.idea.caches.resolve.resolveToDescriptorIfAny
@@ -12,10 +13,11 @@ import org.jetbrains.kotlin.psi.KtDeclaration
 import org.jetbrains.kotlin.types.KotlinType
 import java.util.*
 
-class AnalyticClassStrategy(
-    override val project: Project
-) : AnalyticStrategy {
-    override fun analytic(
+class AnalyseClassStrategy(
+    override val project: Project,
+    private val generatorStyle: GeneratorStyle
+) : AnalyseStrategy {
+    override fun analyse(
         model: KtClass,
         dto: KtClass,
         stack: Stack<DtoModelPair>
@@ -26,8 +28,9 @@ class AnalyticClassStrategy(
 
         val convertedElements = pairs.map { it.second }
 
+        val dtoName = requireNotNull(dto.name) { "Dto name must not be null" }
         return ClassConverter(
-            name = "${dto.name}Converter",
+            name = generatorStyle.getFileName(dtoName),
             from = model.name!!,
             to = dto.name!!,
             imports = listOfNotNull(
@@ -62,6 +65,7 @@ class AnalyticClassStrategy(
                         )
                     )
                 }
+
                 modelType.equalsConverted(valueType) -> {
                     Pair(
                         null,
@@ -71,6 +75,7 @@ class AnalyticClassStrategy(
                         )
                     )
                 }
+
                 modelType.equalsConverted(valueType).not() -> {
                     val dtoShortName = valueType.fqName?.shortName()?.identifier!!
                     val modelShortName = modelType.fqName?.shortName()?.identifier!!
@@ -99,6 +104,7 @@ class AnalyticClassStrategy(
                         )
                     }
                 }
+
                 else -> Pair(
                     null, SimpleConvertedElement(
                         valueParameter.name!!,

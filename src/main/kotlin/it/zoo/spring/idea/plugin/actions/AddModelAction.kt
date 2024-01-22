@@ -16,7 +16,7 @@ class AddModelAction : AnAction() {
         val ktClass = extractPsiClass(e)
         if (ktClass == null) {
             JBPopupFactory.getInstance()
-                .createMessage("Model isn't selected, plugin works only for kotlin,please  move your mouse into your model class")
+                .createMessage("Model isn't selected, plugin works only for kotlin, please  move your mouse into your model class")
                 .showInFocusCenter()
             return
         }

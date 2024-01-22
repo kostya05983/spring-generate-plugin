@@ -6,10 +6,10 @@ import it.zoo.spring.idea.plugin.model.DtoModelPair
 import org.jetbrains.kotlin.psi.KtClass
 import java.util.*
 
-interface AnalyticStrategy {
+interface AnalyseStrategy {
     val project: Project
 
-    fun analytic(
+    fun analyse(
         model: KtClass,
         dto: KtClass,
         stack: Stack<DtoModelPair>

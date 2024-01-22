@@ -4,7 +4,6 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.LangDataKeys
 import com.intellij.openapi.ui.popup.JBPopupFactory
-import com.intellij.psi.PsiManager
 import com.intellij.psi.util.PsiTreeUtil
 import it.zoo.spring.idea.plugin.storage.ProjectStorage
 import org.jetbrains.kotlin.psi.KtClass
@@ -18,7 +17,7 @@ class AddDtoAction : AnAction() {
                 .showInFocusCenter()
             return
         }
-        ProjectStorage.modelDto = ktClass
+        ProjectStorage.dto = ktClass
     }
 
     private fun extractPsiClass(anActionEvent: AnActionEvent): KtClass? {
