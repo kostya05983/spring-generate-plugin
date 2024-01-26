@@ -11,8 +11,8 @@
     <p>
     This open source plugin can help you to generate a lot of converters code in kotlin.
 
-    It uses org.springframework.core.convert.converter.Converter to define converters and matches
-    field names from one model to other.
+    it can generate plugins with usage of org.springframework.core.convert.converter.Converter
+    or with extension functions of kotlin.
     </p>
 
     <p>
