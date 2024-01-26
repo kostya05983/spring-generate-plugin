@@ -11,7 +11,7 @@ class CompositeConverterGenerator(
         GeneratorStyle.KOTLIN -> KotlinConvertersGenerator()
     }
 
-    override fun getString(converter: Converter, packageName: String): String {
-        return generator.getString(converter, packageName,)
+    override fun getString(converters: List<Converter>, packageName: String): String {
+        return generator.getString(converters, packageName,)
     }
 }

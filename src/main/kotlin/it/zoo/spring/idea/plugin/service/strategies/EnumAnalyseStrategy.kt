@@ -1,7 +1,10 @@
 package it.zoo.spring.idea.plugin.service.strategies
 
 import com.intellij.openapi.project.Project
-import it.zoo.spring.idea.plugin.model.*
+import it.zoo.spring.idea.plugin.model.Converter
+import it.zoo.spring.idea.plugin.model.DtoModelPair
+import it.zoo.spring.idea.plugin.model.EnumClassConverter
+import it.zoo.spring.idea.plugin.model.SimpleConvertedElement
 import it.zoo.spring.idea.plugin.service.AnalyseStrategy
 import it.zoo.spring.idea.plugin.service.GeneratorStyle
 import org.jetbrains.kotlin.psi.KtClass
@@ -18,7 +21,15 @@ class EnumAnalyseStrategy(
     ): Converter {
         val modelShortName = model.fqName!!.shortName().identifier
         val dtoShortName = dto.fqName!!.shortName().identifier
-        val convertedElements = model.declarations.map { declaration ->
+
+        val ignoreNames = hashSetOf("toString")
+        model.getProperties().forEach {
+            it.name?.let { ignoreNames.add(it) }
+        }
+
+        val convertedElements = model.declarations.mapNotNull { declaration ->
+            if (ignoreNames.contains(declaration.name)) return@mapNotNull null
+
             when (val dtoDeclaration = dto.declarations.firstOrNull { it.name == declaration.name }) {
                 null -> {
                     SimpleConvertedElement(

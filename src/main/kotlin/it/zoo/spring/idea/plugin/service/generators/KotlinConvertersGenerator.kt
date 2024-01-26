@@ -4,28 +4,22 @@ import it.zoo.spring.idea.plugin.model.*
 
 class KotlinConvertersGenerator : ConverterGenerator {
 
-    override fun getString(converter: Converter, packageName: String): String {
+    override fun getString(converters: List<Converter>, packageName: String): String {
         val sb = StringBuilder()
         sb.append("package $packageName\n")
-        converter.imports.forEach {
+        converters.flatMap { it.imports }.toSet().forEach {
             sb.append("import $it\n")
         }
 
-        val postfix = if (converter.to.lowercase().contains("dto")) {
-            "Dto"
-        } else {
-            "Model"
-        }
-        val reversePostfix = if (converter.to.lowercase().contains("dto")) {
-            "Model"
-        } else {
-            "Dto"
-        }
+        for (converter in converters) {
+            val postfix = if (converter.to.lowercase().contains("dto")) {
+                "Dto"
+            } else {
+                "Model"
+            }
 
-        //todo нужно поправить импорты
-        //todo иногда из enum-ов лезут и их переменные, это тоже нужно поправить
-        getBody(sb, converter, postfix)
-        getBody(sb, converter.reverse(), reversePostfix)
+            getBody(sb, converter, postfix)
+        }
 
         return sb.toString()
     }

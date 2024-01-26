@@ -36,14 +36,13 @@ class GenerateModelService(
         val packageName = PsiManager.getInstance(project).findDirectory(virtualFile)?.getPackage()?.qualifiedName ?: ""
 
         val files = convertersTo.mapIndexed { index: Int, converter: Converter ->
-            val str = codeGenerator.getString(converter, packageName,)
-
-            if (generatorStyle == GeneratorStyle.KOTLIN) {
-//                val reverseConverter = codeGenerator.getString(convertersFrom[index], packageName)
-                KtPsiFactory(project).createFile("${converter.name}.kt", str)
+            val str = if (generatorStyle == GeneratorStyle.KOTLIN) {
+                codeGenerator.getString(listOf(converter, convertersFrom[index]), packageName)
             } else {
-                KtPsiFactory(project).createFile("${converter.name}.kt", str)
+                codeGenerator.getString(listOf(converter), packageName)
             }
+
+            KtPsiFactory(project).createFile("${converter.name}.kt", str)
         }
 
         val application = ApplicationManager.getApplication()
