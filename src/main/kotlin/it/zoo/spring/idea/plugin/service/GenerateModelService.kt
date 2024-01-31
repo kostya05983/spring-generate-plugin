@@ -35,24 +35,24 @@ class GenerateModelService(
 
         val packageName = PsiManager.getInstance(project).findDirectory(virtualFile)?.getPackage()?.qualifiedName ?: ""
 
-        val files = convertersTo.mapIndexed { index: Int, converter: Converter ->
-            val str = if (generatorStyle == GeneratorStyle.KOTLIN) {
-                codeGenerator.getString(listOf(converter, convertersFrom[index]), packageName)
-            } else {
-                codeGenerator.getString(listOf(converter), packageName)
-            }
-
-            KtPsiFactory(project).createFile("${converter.name}.kt", str)
-        }
-
         val application = ApplicationManager.getApplication()
 
-        val directory = PsiDirectoryFactory.getInstance(project).createDirectory(virtualFile)
-        files.forEach {
-            CodeStyleManager.getInstance(project).reformat(it)
-        }
-
         application.runWriteAction {
+            val files = convertersTo.mapIndexed { index: Int, converter: Converter ->
+                val str = if (generatorStyle == GeneratorStyle.KOTLIN) {
+                    codeGenerator.getString(listOf(converter, convertersFrom[index]), packageName)
+                } else {
+                    codeGenerator.getString(listOf(converter), packageName)
+                }
+
+                KtPsiFactory(project).createFile("${converter.name}.kt", str)
+            }
+
+            val directory = PsiDirectoryFactory.getInstance(project).createDirectory(virtualFile)
+            files.forEach {
+                CodeStyleManager.getInstance(project).reformat(it)
+            }
+
             files.forEach {
                 try {
                     directory.add(it)

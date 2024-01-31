@@ -22,31 +22,32 @@ class AnalyseConverterService(project: Project, generatorStyle: GeneratorStyle) 
         stack.push(pair)
 
         val result = mutableListOf<Converter>()
+        val handledConverters = hashSetOf<String>()
         while (stack.isNotEmpty()) {
             val pair = stack.pop()
+
+            if (handledConverters.contains())
+
             val model = pair.model
             val dto = pair.dto
-            when {
+            val converter = when {
                 dto.isData() -> {
-                    val converter = classAnalyseStrategy.analyse(model, dto, stack)
-                    result.add(converter)
+                    classAnalyseStrategy.analyse(model, dto, stack)
                 }
 
                 dto.isEnum() -> {
-                    val converter = enumAnalyseStrategy.analyse(model, dto, stack)
-                    result.add(converter)
+                    enumAnalyseStrategy.analyse(model, dto, stack)
                 }
 
                 dto.isSealed() -> {
-                    val converter = sealedAnalyseStrategy.analyse(model, dto, stack)
-                    result.add(converter)
+                    sealedAnalyseStrategy.analyse(model, dto, stack)
                 }
 
                 else -> {
-                    val converter = classAnalyseStrategy.analyse(model, dto, stack)
-                    result.add(converter)
+                    classAnalyseStrategy.analyse(model, dto, stack)
                 }
             }
+            result.add(converter)
         }
         return result
     }
