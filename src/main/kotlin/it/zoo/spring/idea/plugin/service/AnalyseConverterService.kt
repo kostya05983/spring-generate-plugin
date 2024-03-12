@@ -21,15 +21,17 @@ class AnalyseConverterService(project: Project, generatorStyle: GeneratorStyle) 
         val pair = DtoModelPair(dto, model)
         stack.push(pair)
 
+        val visited = mutableSetOf<KtClass>()
+
         val result = mutableListOf<Converter>()
-        val handledConverters = hashSetOf<String>()
         while (stack.isNotEmpty()) {
             val pair = stack.pop()
 
-            if (handledConverters.contains())
-
             val model = pair.model
             val dto = pair.dto
+
+            if (visited.contains(model)) continue
+
             val converter = when {
                 dto.isData() -> {
                     classAnalyseStrategy.analyse(model, dto, stack)
@@ -47,6 +49,7 @@ class AnalyseConverterService(project: Project, generatorStyle: GeneratorStyle) 
                     classAnalyseStrategy.analyse(model, dto, stack)
                 }
             }
+            visited.add(model)
             result.add(converter)
         }
         return result

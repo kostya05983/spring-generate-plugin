@@ -22,15 +22,14 @@ class EnumAnalyseStrategy(
         val modelShortName = model.fqName!!.shortName().identifier
         val dtoShortName = dto.fqName!!.shortName().identifier
 
-        val ignoreNames = hashSetOf("toString")
-        model.getProperties().forEach {
-            it.name?.let { ignoreNames.add(it) }
-        }
+        ignoreNames.addAll(model.getProperties().mapNotNull { it.name })
 
         val convertedElements = model.declarations.mapNotNull { declaration ->
             if (ignoreNames.contains(declaration.name)) return@mapNotNull null
 
-            when (val dtoDeclaration = dto.declarations.firstOrNull { it.name == declaration.name }) {
+            val dtoDeclaration = dto.declarations.firstOrNull { it.name == declaration.name }
+
+            when (dtoDeclaration) {
                 null -> {
                     SimpleConvertedElement(
                         from = "$modelShortName.${declaration.name}",
@@ -59,5 +58,9 @@ class EnumAnalyseStrategy(
             ),
             elements = convertedElements
         )
+    }
+
+    private companion object {
+        val ignoreNames = hashSetOf("toString")
     }
 }

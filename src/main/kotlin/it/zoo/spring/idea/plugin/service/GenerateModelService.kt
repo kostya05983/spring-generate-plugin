@@ -39,11 +39,12 @@ class GenerateModelService(
 
         application.runWriteAction {
             val files = convertersTo.mapIndexed { index: Int, converter: Converter ->
-                val str = if (generatorStyle == GeneratorStyle.KOTLIN) {
-                    codeGenerator.getString(listOf(converter, convertersFrom[index]), packageName)
+                val converters = if (generatorStyle == GeneratorStyle.KOTLIN) {
+                    listOf(converter, convertersFrom[index])
                 } else {
-                    codeGenerator.getString(listOf(converter), packageName)
+                    listOf(converter)
                 }
+                val str = codeGenerator.getString(converters, packageName)
 
                 KtPsiFactory(project).createFile("${converter.name}.kt", str)
             }
