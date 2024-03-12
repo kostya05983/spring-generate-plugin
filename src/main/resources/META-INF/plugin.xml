@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>spring-generation-tools</id>
     <name>spring-generation-tools</name>
-    <version>1.1.0</version>
+    <version>1.1.1</version>
     <idea-version since-build="223"/>
     <vendor email="kostya05983@mail.ru">Konstantin Volivach</vendor>
 
@@ -61,6 +61,8 @@
       1.0.2 - delete usages of deprecated api
       <br/>
       1.1.0 - add kotlin style of converters
+      <br/>
+      1.1.1 - fix bug with recursive models
       </html>
       ]]>
     </change-notes>

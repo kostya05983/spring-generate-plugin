@@ -21,32 +21,36 @@ class AnalyseConverterService(project: Project, generatorStyle: GeneratorStyle) 
         val pair = DtoModelPair(dto, model)
         stack.push(pair)
 
+        val visited = mutableSetOf<KtClass>()
+
         val result = mutableListOf<Converter>()
         while (stack.isNotEmpty()) {
             val pair = stack.pop()
+
             val model = pair.model
             val dto = pair.dto
-            when {
+
+            if (visited.contains(model)) continue
+
+            val converter = when {
                 dto.isData() -> {
-                    val converter = classAnalyseStrategy.analyse(model, dto, stack)
-                    result.add(converter)
+                    classAnalyseStrategy.analyse(model, dto, stack)
                 }
 
                 dto.isEnum() -> {
-                    val converter = enumAnalyseStrategy.analyse(model, dto, stack)
-                    result.add(converter)
+                    enumAnalyseStrategy.analyse(model, dto, stack)
                 }
 
                 dto.isSealed() -> {
-                    val converter = sealedAnalyseStrategy.analyse(model, dto, stack)
-                    result.add(converter)
+                    sealedAnalyseStrategy.analyse(model, dto, stack)
                 }
 
                 else -> {
-                    val converter = classAnalyseStrategy.analyse(model, dto, stack)
-                    result.add(converter)
+                    classAnalyseStrategy.analyse(model, dto, stack)
                 }
             }
+            visited.add(model)
+            result.add(converter)
         }
         return result
     }

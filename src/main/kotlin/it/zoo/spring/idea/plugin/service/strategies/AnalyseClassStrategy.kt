@@ -6,8 +6,8 @@ import it.zoo.spring.idea.plugin.service.AnalyseStrategy
 import it.zoo.spring.idea.plugin.service.GeneratorStyle
 import it.zoo.spring.idea.plugin.utils.KotlinIndexUtils
 import org.jetbrains.kotlin.descriptors.CallableDescriptor
+import org.jetbrains.kotlin.idea.base.utils.fqname.fqName
 import org.jetbrains.kotlin.idea.caches.resolve.resolveToDescriptorIfAny
-import org.jetbrains.kotlin.idea.refactoring.fqName.fqName
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtDeclaration
 import org.jetbrains.kotlin.types.KotlinType
@@ -17,12 +17,13 @@ class AnalyseClassStrategy(
     override val project: Project,
     private val generatorStyle: GeneratorStyle
 ) : AnalyseStrategy {
+
     override fun analyse(
         model: KtClass,
         dto: KtClass,
         stack: Stack<DtoModelPair>
     ): Converter {
-        val pairs = analyticDataClass(model, dto)
+        val pairs = analyseDataClass(model, dto)
         val tasks = pairs.mapNotNull { it.first }
         tasks.forEach { stack.push(it) }
 
@@ -41,73 +42,73 @@ class AnalyseClassStrategy(
         )
     }
 
-    private fun KotlinType.equalsConverted(other: KotlinType): Boolean {
-        return this.fqName == other.fqName && this.arguments == other.arguments
-    }
-
-    private fun analyticDataClass(
+    private fun analyseDataClass(
         model: KtClass,
         dto: KtClass
     ): List<Pair<DtoModelPair?, ConvertedElement>> {
         val parameters = dto.primaryConstructorParameters
-        return parameters.map { valueParameter ->
-            val modelValueParameter =
-                model.primaryConstructorParameters.firstOrNull { it.name == valueParameter.name }
-            val modelType = modelValueParameter?.type()
-            val valueType = valueParameter.type()!!
+
+        return parameters.map { dtoParameter ->
+            val modelValueParameter = model.primaryConstructorParameters.firstOrNull { it.name == dtoParameter.name }
+            val modelParameterType = modelValueParameter?.type()
+            val dtoParameterType = requireNotNull(dtoParameter.type()) { "Parameter type must not be null" }
+
             when {
-                modelType == null -> {
+                modelParameterType == null -> {
                     Pair(
                         null,
                         SimpleConvertedElement(
-                            valueParameter.name!!,
+                            dtoParameter.name!!,
                             null
                         )
                     )
                 }
 
-                modelType.equalsConverted(valueType) -> {
+                modelParameterType.equalsConverted(dtoParameterType) -> {
                     Pair(
                         null,
                         SimpleConvertedElement(
-                            valueParameter.name!!,
+                            dtoParameter.name!!,
                             modelValueParameter.name!!
                         )
                     )
                 }
 
-                modelType.equalsConverted(valueType).not() -> {
-                    val dtoShortName = valueType.fqName?.shortName()?.identifier!!
-                    val modelShortName = modelType.fqName?.shortName()?.identifier!!
+                modelParameterType.equalsConverted(dtoParameterType).not() -> {
+                    val dtoShortName = dtoParameterType.shortNameIdentifier()
+                    val modelShortName = modelParameterType.shortNameIdentifier()
+
                     if (dtoShortName == "List" && modelShortName == "List") {
+                        val dtoListType = dtoParameterType.arguments[0].type
+
                         val (task, convertedElement) = convertUnmatch(
-                            valueParameter.name!!,
+                            dtoParameter.name!!,
                             modelValueParameter.name!!,
-                            valueType.arguments[0].type,
-                            modelType.arguments[0].type
+                            dtoListType,
+                            modelParameterType.arguments[0].type,
                         )
                         Pair(
                             task,
                             ListConvertedElement(
-                                isNullableConvert = modelType.isMarkedNullable,
-                                from = valueParameter.name!!,
+                                isNullableConvert = modelParameterType.isMarkedNullable,
+                                from = dtoParameter.name!!,
                                 to = modelValueParameter.name!!,
                                 element = convertedElement
                             )
                         )
                     } else {
                         convertUnmatch(
-                            valueParameter.name!!,
+                            dtoParameter.name!!,
                             modelValueParameter.name!!,
-                            valueType,
-                            modelType
+                            dtoParameterType,
+                            modelParameterType
                         )
                     }
                 }
 
                 else -> Pair(
                     null, SimpleConvertedElement(
-                        valueParameter.name!!,
+                        dtoParameter.name!!,
                         null
                     )
                 )
@@ -119,7 +120,7 @@ class AnalyseClassStrategy(
         dtoParameterName: String,
         modelParameterName: String,
         dtoParameter: KotlinType,
-        modelParameter: KotlinType
+        modelParameter: KotlinType,
     ): Pair<DtoModelPair?, ConvertedElement> {
         val dtoShortName = dtoParameter.fqName?.shortName()?.identifier
 
@@ -129,6 +130,7 @@ class AnalyseClassStrategy(
         val modelKClass = modelParameter.fqName?.let {
             KotlinIndexUtils.getKClass(it.asString(), project)
         }
+
         val task = if (dtoKClass != null && modelKClass != null) DtoModelPair(
             dtoKClass,
             modelKClass
@@ -142,6 +144,14 @@ class AnalyseClassStrategy(
                 dtoShortName
             )
         )
+    }
+
+    private fun KotlinType.equalsConverted(other: KotlinType): Boolean {
+        return this.fqName == other.fqName && this.arguments == other.arguments
+    }
+
+    private fun KotlinType.shortNameIdentifier(): String {
+        return requireNotNull(fqName?.shortName()?.identifier) { "ShortName identifier must exists" }
     }
 
     private fun KtDeclaration.type() =
